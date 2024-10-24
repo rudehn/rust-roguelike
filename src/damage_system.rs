@@ -1,31 +1,6 @@
 use specs::prelude::*;
-use super::{Pools, SufferDamage, Player, Name, gamelog::GameLog, RunState, Position, Map,
+use super::{Pools, Player, Name, RunState, Position,
     InBackpack, Equipped, LootTable};
-
-pub struct DamageSystem {}
-
-impl<'a> System<'a> for DamageSystem {
-    type SystemData = ( WriteStorage<'a, Pools>,
-                        WriteStorage<'a, SufferDamage>,
-                        ReadStorage<'a, Position>,
-                        WriteExpect<'a, Map>,
-                        Entities<'a> );
-
-    fn run(&mut self, data : Self::SystemData) {
-        let (mut stats, mut damage, positions, mut map, entities) = data;
-
-        for (entity, mut stats, damage) in (&entities, &mut stats, &damage).join() {
-            stats.hit_points.current -= damage.amount.iter().sum::<i32>();
-            let pos = positions.get(entity);
-            if let Some(pos) = pos {
-                let idx = map.xy_idx(pos.x, pos.y);
-                map.bloodstains.insert(idx);
-            }
-        }
-
-        damage.clear();
-    }
-}
 
 pub fn delete_the_dead(ecs : &mut World) {
     let mut dead : Vec<Entity> = Vec::new();
@@ -35,7 +10,6 @@ pub fn delete_the_dead(ecs : &mut World) {
         let players = ecs.read_storage::<Player>();
         let names = ecs.read_storage::<Name>();
         let entities = ecs.entities();
-        let mut log = ecs.write_resource::<GameLog>();
         for (entity, stats) in (&entities, &combat_stats).join() {
             if stats.hit_points.current < 1 {
                 let player = players.get(entity);
@@ -43,7 +17,11 @@ pub fn delete_the_dead(ecs : &mut World) {
                     None => {
                         let victim_name = names.get(entity);
                         if let Some(victim_name) = victim_name {
-                            log.entries.push(format!("{} is dead", &victim_name.name));
+                            crate::gamelog::Logger::new()
+                                .color(rltk::RED)
+                                .append(&victim_name.name)
+                                .append("is dead!")
+                                .log();
                         }
                         dead.push(entity)
                     }
@@ -65,7 +43,6 @@ pub fn delete_the_dead(ecs : &mut World) {
         let mut carried = ecs.write_storage::<InBackpack>();
         let mut positions = ecs.write_storage::<Position>();
         let loot_tables = ecs.read_storage::<LootTable>();
-        let mut rng = ecs.write_resource::<rltk::RandomNumberGenerator>();
         for victim in dead.iter() {
             let pos = positions.get(*victim);
             for (entity, equipped) in (&entities, &equipped).join() {
@@ -88,7 +65,6 @@ pub fn delete_the_dead(ecs : &mut World) {
             if let Some(table) = loot_tables.get(*victim) {
                 let drop_finder = crate::raws::get_item_drop(
                     &crate::raws::RAWS.lock().unwrap(),
-                    &mut rng,
                     &table.table
                 );
                 if let Some(tag) = drop_finder {
@@ -114,6 +90,36 @@ pub fn delete_the_dead(ecs : &mut World) {
                 &drop.0,
                 crate::raws::SpawnType::AtPosition{x : drop.1.x, y: drop.1.y}
             );
+        }
+    }
+
+    // Fire death events
+    use crate::effects::*;
+    use crate::Map;
+    use crate::components::{OnDeath, AreaOfEffect};
+    for victim in dead.iter() {
+        let death_effects = ecs.read_storage::<OnDeath>();
+        if let Some(death_effect) = death_effects.get(*victim) {
+            for effect in death_effect.abilities.iter() {
+                if crate::rng::roll_dice(1,100) <= (effect.chance * 100.0) as i32 {
+                    let map = ecs.fetch::<Map>();
+                    if let Some(pos) = ecs.read_storage::<Position>().get(*victim) {
+                        let spell_entity = crate::raws::find_spell_entity(ecs, &effect.spell).unwrap();
+                        let tile_idx = map.xy_idx(pos.x, pos.y);
+                        let target = 
+                            if let Some(aoe) = ecs.read_storage::<AreaOfEffect>().get(spell_entity) {
+                                Targets::Tiles { tiles : aoe_tiles(&map, rltk::Point::new(pos.x, pos.y), aoe.radius) }
+                            } else {
+                                Targets::Tile{ tile_idx : tile_idx as i32 }
+                            };
+                        add_effect(
+                            None,
+                            EffectType::SpellUse{ spell: crate::raws::find_spell_entity( ecs, &effect.spell ).unwrap() },
+                            target
+                        );
+                    }
+                }
+            }
         }
     }
 

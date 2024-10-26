@@ -26,12 +26,12 @@ construct_dispatcher!(
     (InitiativeSystem, "initiative", &[]),
     (TurnStatusSystem, "turnstatus", &[]),
     (QuipSystem, "quips", &[]),
-    (AdjacentAI, "adjacent", &[]),
+    (AdjacentAI, "adjacent", &[]), // small drop
     (VisibleAI, "visible", &[]),
     (ApproachAI, "approach", &[]),
     (FleeAI, "flee", &[]),
     (ChaseAI, "chase", &[]),
-    (DefaultMoveAI, "default_move", &[]),
+    (DefaultMoveAI, "default_move", &[]), //huge slow down
     (MovementSystem, "movement", &[]),
     (TriggerSystem, "triggers", &[]),
     (MeleeCombatSystem, "melee", &[]),

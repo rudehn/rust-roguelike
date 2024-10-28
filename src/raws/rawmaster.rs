@@ -6,6 +6,7 @@ use crate::random_table::{MasterTable, RandomTable};
 use crate::{attr_bonus, npc_hp, mana_at_level};
 use regex::Regex;
 use specs::saveload::{MarkedBuilder, SimpleMarker};
+use super::EffectValues;
 
 pub fn parse_dice_string(dice : &str) -> (i32, i32, i32) {
     lazy_static! {
@@ -398,26 +399,26 @@ macro_rules! apply_effects {
         for effect in $effects.iter() {
         let effect_name = effect.0.as_str();
             match effect_name {
-                "provides_healing" => $eb = $eb.with(ProvidesHealing{ heal_amount: effect.1.parse::<i32>().unwrap() }),
-                "provides_mana" => $eb = $eb.with(ProvidesMana{ mana_amount: effect.1.parse::<i32>().unwrap() }),
-                "teach_spell" => $eb = $eb.with(TeachesSpell{ spell: effect.1.to_string() }),
-                "ranged" => $eb = $eb.with(Ranged{ range: effect.1.parse::<i32>().unwrap() }),
-                "damage" => $eb = $eb.with(InflictsDamage{ damage : effect.1.parse::<i32>().unwrap() }),
-                "area_of_effect" => $eb = $eb.with(AreaOfEffect{ radius: effect.1.parse::<i32>().unwrap() }),
+                "provides_healing" =>  $eb = $eb.with(ProvidesHealing{ heal_amount: effect.1.amount.unwrap() }),
+                "provides_mana" => $eb = $eb.with(ProvidesMana{ mana_amount: effect.1.amount.unwrap() }),
+                "teach_spell" => $eb = $eb.with(TeachesSpell{ spell: effect.1.value.as_ref().unwrap().to_string() }),
+                "ranged" => $eb = $eb.with(Ranged{ range: effect.1.amount.unwrap() }),
+                "damage" => $eb = $eb.with(InflictsDamage{ damage : effect.1.amount.unwrap() }),
+                "area_of_effect" => $eb = $eb.with(AreaOfEffect{ radius: effect.1.amount.unwrap() }),
                 "confusion" => {
                     $eb = $eb.with(Confusion{});
-                    $eb = $eb.with(Duration{ turns: effect.1.parse::<i32>().unwrap() });
+                    $eb = $eb.with(Duration{ turns: effect.1.duration.unwrap() });
                 }
                 "magic_mapping" => $eb = $eb.with(MagicMapper{}),
                 "town_portal" => $eb = $eb.with(TownPortal{}),
                 "food" => $eb = $eb.with(ProvidesFood{}),
                 "single_activation" => $eb = $eb.with(SingleActivation{}),
-                "particle_line" => $eb = $eb.with(parse_particle_line(&effect.1)),
-                "particle" => $eb = $eb.with(parse_particle(&effect.1)),
+                "particle_line" => $eb = $eb.with(parse_particle_line(effect.1.value.as_ref().unwrap())),
+                "particle" => $eb = $eb.with(parse_particle(effect.1.value.as_ref().unwrap())),
                 "remove_curse" => $eb = $eb.with(ProvidesRemoveCurse{}),
                 "identify" => $eb = $eb.with(ProvidesIdentification{}),
-                "slow" => $eb = $eb.with(Slow{ initiative_penalty : effect.1.parse::<f32>().unwrap() }),
-                "damage_over_time" => $eb = $eb.with( DamageOverTime { damage : effect.1.parse::<i32>().unwrap() } ),
+                "slow" => $eb = $eb.with(Slow{ initiative_penalty : effect.1.amount.unwrap() as f32}),
+                "damage_over_time" => $eb = $eb.with( DamageOverTime { damage : effect.1.amount.unwrap() } ),
                 "target_self" => $eb = $eb.with( AlwaysTargetsSelf{} ),
                 _ => rltk::console::log(format!("Warning: consumable effect {} not implemented.", effect_name))
             }

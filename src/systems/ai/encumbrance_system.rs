@@ -26,6 +26,7 @@ impl<'a> System<'a> for EncumbranceSystem {
             mut pools, mut attributes, player, attrbonus, statuses, slowed) = data;
 
         if equip_dirty.is_empty() { return; }
+        println!("Got dirty equip flag!");
 
         struct ItemUpdate {
             weight : f32,
@@ -46,8 +47,11 @@ impl<'a> System<'a> for EncumbranceSystem {
         equip_dirty.clear();
 
         // Total up equipped items
+
+        println!("Totalling equipped items!");
         for (item, equipped, entity) in (&items, &wielded, &entities).join() {
             if to_update.contains_key(&equipped.owner) {
+                println!("I'm the owner!");
                 let totals = to_update.get_mut(&equipped.owner).unwrap();
                 totals.weight += item.weight_lbs;
                 totals.initiative += item.initiative_penalty;
@@ -61,6 +65,7 @@ impl<'a> System<'a> for EncumbranceSystem {
         }
 
         // Total up carried items
+        println!("Totalling up carried items");
         for (item, carried) in (&items, &backpacks).join() {
             if to_update.contains_key(&carried.owner) {
                 let totals = to_update.get_mut(&carried.owner).unwrap();
@@ -70,7 +75,9 @@ impl<'a> System<'a> for EncumbranceSystem {
         }
 
         // Total up status effect modifiers
+        println!("Totalling up status effects");
         for (status, attr) in (&statuses, &attrbonus).join() {
+            println!("Found an effect");
             if to_update.contains_key(&status.target) {
                 let totals = to_update.get_mut(&status.target).unwrap();
                 totals.might += attr.might.unwrap_or(0);

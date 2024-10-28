@@ -16,13 +16,34 @@ pub struct PrefabSection {
 }
 
 #[allow(dead_code)]
+pub const NORTH_CASTLE : PrefabSection = PrefabSection{
+    template : NORTH_CASTLE_MAP,
+    width: 74,
+    height: 12,
+    placement: ( HorizontalPlacement::Center, VerticalPlacement::Top )
+};
+
+const NORTH_CASTLE_MAP : &str = "
+  # #                                                               !# #  
+  #                                 >>                               # #  
+### ###        #######        ######≈≈######       #######         ### ###
+#     #        #     #        ##   ≈≈≈≈≈  ##       #     #               #
+#     ##########     ###########  ≈≈≈≈≈   ##########     #########^      #
+#                                  ≈≈≈  ^                                #
+#     ##########  ^  ###########  ≈ ≈≈≈   ##########     ###########     #
+#!    #   g    #     #        ##    O     ##     g☼#     #         #%    #
+#######  g☼    #######        ##   o☼   g ##       #######         #######
+                              ##!       ☼o##                              
+                              ######  ######                 o            
+                                                            g☼g           
+";
+
 pub const UNDERGROUND_FORT : PrefabSection = PrefabSection{
     template : RIGHT_FORT,
     width: 15,
     height: 43,
     placement: ( HorizontalPlacement::Right, VerticalPlacement::Top )
 };
-
 #[allow(dead_code)]
 // The padding needs to be here!
 const RIGHT_FORT : &str = "

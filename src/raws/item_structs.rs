@@ -1,5 +1,6 @@
 use serde::{Deserialize};
 use std::collections::HashMap;
+use super::EffectValues;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Item {
@@ -29,7 +30,7 @@ pub struct Renderable {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Consumable {
-    pub effects : HashMap<String, String>,
+    pub effects : HashMap<String, EffectValues>,
     pub charges : Option<i32>
 }
 
@@ -41,7 +42,7 @@ pub struct Weapon {
     pub hit_bonus: i32,
     pub proc_chance : Option<f32>,
     pub proc_target : Option<String>,
-    pub proc_effects : Option<HashMap<String, String>>
+    pub proc_effects : Option<HashMap<String, EffectValues>>
 }
 
 #[derive(Deserialize, Debug, Clone)]

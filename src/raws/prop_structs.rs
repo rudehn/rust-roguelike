@@ -1,6 +1,7 @@
 use serde::{Deserialize};
 use super::{Renderable};
 use std::collections::HashMap;
+use super::EffectValues;
 
 #[derive(Deserialize, Debug)]
 pub struct Prop {
@@ -16,5 +17,5 @@ pub struct Prop {
 
 #[derive(Deserialize, Debug)]
 pub struct EntryTrigger {
-    pub effects : HashMap<String, String>
+    pub effects : HashMap<String, EffectValues>
 }

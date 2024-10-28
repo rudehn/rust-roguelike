@@ -29,7 +29,7 @@ mod systems;
 pub mod rng;
 pub mod spatial;
 
-const SHOW_MAPGEN_VISUALIZER : bool = false;
+const SHOW_MAPGEN_VISUALIZER : bool = true;
 const SHOW_FPS : bool = true;
 
 #[derive(PartialEq, Copy, Clone)]

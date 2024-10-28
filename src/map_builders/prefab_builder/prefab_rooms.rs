@@ -63,3 +63,33 @@ const CHECKERBOARD_MAP : &str = "
  ^# # 
       
 ";
+
+#[allow(dead_code)]
+pub const GOBLIN_WATCH_FIRE : PrefabRoom = PrefabRoom{
+    template : GOBLIN_WATCH_FIRE_MAP,
+    width: 3,
+    height: 3,
+    first_depth: 0,
+    last_depth: 100
+};
+
+const GOBLIN_WATCH_FIRE_MAP : &str = "
+   
+g☼g
+   
+";
+
+pub const ORC_WATCH_FIRE : PrefabRoom = PrefabRoom{
+    template : ORC_WATCH_FIRE_MAP,
+    width: 3,
+    height: 3,
+    first_depth: 0,
+    last_depth: 100
+};
+
+const ORC_WATCH_FIRE_MAP : &str = "
+ o 
+ ☼o
+   
+";
+

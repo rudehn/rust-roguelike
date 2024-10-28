@@ -1,75 +1,48 @@
 use super::{Map, Rect, TileType, Position, spawner, SHOW_MAPGEN_VISUALIZER};
 use specs::prelude::*;
 mod simple_map;
-mod bsp_dungeon;
-mod bsp_interior;
-mod cellular_automata;
-mod drunkard;
-mod maze;
-mod dla;
+mod algorithms;
+mod utility;
+mod levels;
 mod common;
-mod voronoi;
 mod waveform_collapse;
 mod prefab_builder;
-mod room_based_spawner;
-mod room_based_starting_position;
-mod room_based_stairs;
-mod area_starting_points;
-mod cull_unreachable;
-mod voronoi_spawning;
-mod distant_exit;
-mod room_exploder;
-mod room_corner_rounding;
-mod rooms_corridors_dogleg;
-mod rooms_corridors_bsp;
-mod room_sorter;
-mod room_draw;
-mod rooms_corridors_nearest;
-mod rooms_corridors_lines;
-mod room_corridor_spawner;
-mod door_placement;
-mod town;
-mod forest;
-mod limestone_cavern;
-mod dwarf_fort_builder;
-mod area_ending_point;
-use forest::forest_builder;
-use limestone_cavern::*;
-use dwarf_fort_builder::*;
-use distant_exit::DistantExit;
+
+use levels::forest::{forest_builder, forest2_builder, forest_castle_transition_builder};
+use levels::limestone_cavern::*;
+use levels::dwarf_fort_builder::*;
+use utility::distant_exit::DistantExit;
 use simple_map::SimpleMapBuilder;
-use bsp_dungeon::BspDungeonBuilder;
-use bsp_interior::BspInteriorBuilder;
-use cellular_automata::CellularAutomataBuilder;
-use drunkard::DrunkardsWalkBuilder;
-use voronoi::VoronoiCellBuilder;
+use algorithms::bsp_dungeon::BspDungeonBuilder;
+use algorithms::bsp_interior::BspInteriorBuilder;
+use algorithms::cellular_automata::CellularAutomataBuilder;
+use algorithms::drunkard::DrunkardsWalkBuilder;
+use algorithms::maze::MazeBuilder;
+use algorithms::dla::DLABuilder;
+use algorithms::voronoi::VoronoiCellBuilder;
+use algorithms::voronoi_spawning::VoronoiSpawning;
 use waveform_collapse::WaveformCollapseBuilder;
 use prefab_builder::PrefabBuilder;
-use room_based_spawner::RoomBasedSpawner;
-use room_based_starting_position::RoomBasedStartingPosition;
-use room_based_stairs::RoomBasedStairs;
-use area_starting_points::{AreaStartingPosition, XStart, YStart};
-use cull_unreachable::CullUnreachable;
-use voronoi_spawning::VoronoiSpawning;
-use maze::MazeBuilder;
-use dla::DLABuilder;
+use utility::room_based_spawner::RoomBasedSpawner;
+use utility::room_based_starting_position::RoomBasedStartingPosition;
+use utility::room_based_stairs::RoomBasedStairs;
+use utility::area_starting_points::{AreaStartingPosition, XStart, YStart};
+use utility::cull_unreachable::CullUnreachable;
 use common::*;
-use room_exploder::RoomExploder;
-use room_corner_rounding::RoomCornerRounder;
-use rooms_corridors_dogleg::DoglegCorridors;
-use rooms_corridors_bsp::BspCorridors;
-use room_sorter::{RoomSorter, RoomSort};
-use room_draw::RoomDrawer;
-use rooms_corridors_nearest::NearestCorridors;
-use rooms_corridors_lines::StraightLineCorridors;
-use room_corridor_spawner::CorridorSpawner;
-use door_placement::DoorPlacement;
-use town::town_builder;
-use area_ending_point::*;
-mod mushroom_forest;
-use mushroom_forest::*;
-mod dark_elves;
-use dark_elves::*;
+use utility::room_exploder::RoomExploder;
+use utility::room_corner_rounding::RoomCornerRounder;
+use utility::rooms_corridors_dogleg::DoglegCorridors;
+use utility::rooms_corridors_bsp::BspCorridors;
+use utility::room_sorter::{RoomSorter, RoomSort};
+use utility::room_draw::RoomDrawer;
+use utility::rooms_corridors_nearest::NearestCorridors;
+use utility::rooms_corridors_lines::StraightLineCorridors;
+use utility::room_corridor_spawner::CorridorSpawner;
+use utility::door_placement::DoorPlacement;
+use levels::town::town_builder;
+use utility::area_ending_point::*;
+use levels::mushroom_forest::*;
+use levels::dark_elves::*;
 
 pub struct BuilderMap {
     pub spawn_list : Vec<(usize, String)>,
@@ -307,6 +280,24 @@ pub fn random_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
 }
 
 pub fn level_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
+    rltk::console::log(format!("Depth: {}", new_depth));
+    match new_depth {
+        1 => town_builder(new_depth, width, height),
+        2 => forest_builder(new_depth, width, height),
+        3 => forest2_builder(new_depth, width, height),
+        4 => forest_castle_transition_builder(new_depth, width, height),
+
+        5 => limestone_transition_builder(new_depth, width, height),
+        6 => dwarf_fort_builder(new_depth, width, height),
+        7 => mushroom_entrance(new_depth, width, height),
+        8 => mushroom_builder(new_depth, width, height),
+        9 => mushroom_exit(new_depth, width, height),
+        10 => dark_elf_city(new_depth, width, height),
+        11 => dark_elf_plaza(new_depth, width, height),
+        _ => random_builder(new_depth, width, height)
+    }
+}
+pub fn level_builder2(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     rltk::console::log(format!("Depth: {}", new_depth));
     match new_depth {
         1 => town_builder(new_depth, width, height),

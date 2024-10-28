@@ -127,7 +127,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "teach_spell" : "Zap" }
+            "effects" : { "teach_spell" : {"value": "Zap"}}
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -143,7 +143,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "teach_spell" : "Web" }
+            "effects" : { "teach_spell" : {"value": "Web"} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -159,7 +159,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "teach_spell" : "Venom" }
+            "effects" : { "teach_spell" :  {"value": "Venom"} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -175,7 +175,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "damage_over_time" : "2" }
+            "effects" : { "damage_over_time" :  {"amount": 2} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -192,7 +192,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "slow" : "2.0" }
+            "effects" : { "slow" :  {"amount": 2} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -209,7 +209,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "slow" : "-2.0" }
+            "effects" : { "slow" :  {"amount": -2} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 100.0,
@@ -226,7 +226,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "provides_healing" : "8" }
+            "effects" : { "provides_healing" :  {"amount": 8} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -243,7 +243,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "provides_mana" : "4" }
+            "effects" : { "provides_mana" : {"amount": 4} }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -260,7 +260,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "particle" : "!;#FF0000;200.0" }
+            "effects" : { "particle" : {"value": "!;#FF0000;200.0"}  }
         },
         "weight_lbs" : 0.5,
         "base_value" : 50.0,
@@ -279,9 +279,9 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "damage" : "20",
-                "particle_line" : "▓;#00FFFF;200.0"
+                "ranged" : {"amount": 6},
+                "damage" : {"amount": 20},
+                "particle_line" : {"value": "▓;#00FFFF;200.0"}
             }
         },
         "weight_lbs" : 0.5,
@@ -300,10 +300,10 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "slow" : "10.0",
-                "area_of_effect" : "3",
-                "particle_line" : "☼;#FFFFFF;200.0"
+                "ranged" : {"amount": 6},
+                "slow" : {"amount": 10},
+                "area_of_effect" : {"amount": 3},
+                "particle_line" : {"value": "☼;#FFFFFF;200.0"} 
             }
         },
         "weight_lbs" : 0.5,
@@ -322,10 +322,10 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "damage" : "20",
-                "area_of_effect" : "3",
-                "particle" : "▓;#FFA500;200.0"
+                "ranged" : {"amount": 6},
+                "damage" : {"amount": 20},
+                "area_of_effect" : {"amount": 3},
+                "particle" : {"value": "▓;#FFA500;200.0"}
             }
         },
         "weight_lbs" : 0.5,
@@ -344,8 +344,8 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "confusion" : "4"
+                "ranged" : {"amount": 6},
+                "confusion" : {"duration": 4}
             }
         },
         "weight_lbs" : 0.5,
@@ -364,7 +364,7 @@
         },
         "consumable" : {
             "effects" : {
-                "magic_mapping" : ""
+                "magic_mapping" : {}
             }
         },
         "weight_lbs" : 0.5,
@@ -383,7 +383,7 @@
         },
         "consumable" : {
             "effects" : {
-                "town_portal" : ""
+                "town_portal" : {}
             }
         },
         "weight_lbs" : 0.5,
@@ -402,7 +402,7 @@
         },
         "consumable" : {
             "effects" : {
-                "remove_curse" : ""
+                "remove_curse" : {}
             }
         },
         "weight_lbs" : 0.5,
@@ -421,7 +421,7 @@
         },
         "consumable" : {
             "effects" : {
-                "identify" : ""
+                "identify" : {}
             }
         },
         "weight_lbs" : 0.5,
@@ -440,7 +440,7 @@
         },
         "consumable" : {
             "effects" : { 
-                "food" : ""
+                "food" : {}
             }
         },
         "weight_lbs" : 2.0,
@@ -458,7 +458,7 @@
         },
         "consumable" : {
             "effects" : { 
-                "food" : ""
+                "food" : {}
             }
         },
         "weight_lbs" : 2.0,
@@ -500,7 +500,7 @@
         },
         "consumable" : {
             "effects" : { 
-                "food" : ""
+                "food" : {}
             }
         },
         "weight_lbs" : 2.0,
@@ -516,7 +516,7 @@
             "order" : 2
         },
         "consumable" : {
-            "effects" : { "provides_healing" : "4" }
+            "effects" : { "provides_healing" : {"amount": 4} }
         },
         "weight_lbs" : 2.0,
         "base_value" : 0.5,
@@ -1455,10 +1455,10 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "damage" : "20",
-                "area_of_effect" : "3",
-                "particle" : "▓;#FFA500;200.0"
+                "ranged" : {"amount": 6},
+                "damage" : {"amount": 20},
+                "area_of_effect" : {"amount": 3},
+                "particle" : {"value": "▓;#FFA500;200.0"}
             },
             "charges" : 5
         },
@@ -1478,9 +1478,9 @@
         },
         "consumable" : {
             "effects" : { 
-                "ranged" : "6",
-                "damage_over_time" : "1",
-                "particle_line" : "▓;#00FF00;200.0"
+                "ranged" : {"amount": 6},
+                "damage_over_time" : {"amount": 1},
+                "particle_line" : {"value": "▓;#00FF00;200.0"}
             },
             "charges" : 5
         },
@@ -1668,7 +1668,7 @@
         },
         "blocks_tile" : true,
         "vision_range" : 4,
-        "movement" : "random_waypoint",
+        "movement" : "random",
         "quips" : [ "Why are you in my house?" ],
         "attributes" : {},
         "equipped" : [ "Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers" ],
@@ -1686,7 +1686,7 @@
         },
         "blocks_tile" : true,
         "vision_range" : 4,
-        "movement" : "random_waypoint",
+        "movement" : "random",
         "quips" : [ "Lovely day, eh?", "Nice weather", "Hello" ],
         "attributes" : {},
         "equipped" : [ "Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers" ],
@@ -1704,7 +1704,7 @@
         },
         "blocks_tile" : true,
         "vision_range" : 4,
-        "movement" : "random_waypoint",
+        "movement" : "random",
         "quips" : [ "They're biting today!", "I caught something, but it wasn't a fish!", "Looks like rain" ],
         "attributes" : {},
         "equipped" : [ "Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers" ],
@@ -1722,7 +1722,7 @@
         },
         "blocks_tile" : true,
         "vision_range" : 4,
-        "movement" : "random_waypoint",
+        "movement" : "random",
         "quips" : [ "Arrr", "Grog!", "Booze!" ],
         "attributes" : {},
         "equipped" : [ "Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers" ],
@@ -2525,8 +2525,8 @@
         "hidden" : true,
         "entry_trigger" : {
             "effects" : {
-                "damage" : "6",
-                "single_activation" : "1"
+                "damage" : {"amount": 6},
+                "single_activation" : {}
             }
         }
     },
@@ -2542,8 +2542,8 @@
         "hidden" : true,
         "entry_trigger" : {
             "effects" : {
-                "damage" : "12",
-                "single_activation" : "1"
+                "damage" : {"amount": 12},
+                "single_activation" : {}
             }
         }
     },
@@ -2559,10 +2559,10 @@
         "hidden" : true,
         "entry_trigger" : {
             "effects" : {
-                "damage" : "18",
-                "single_activation" : "1",
-                "area_of_effect" : "3",
-                "particle" : "▓;#FFA500;200.0"
+                "damage" : {"amount": 18},
+                "single_activation" : {},
+                "area_of_effect" : {"amount": 3},
+                "particle" : {"value": "▓;#FFA500;200.0"}
             }
         }
     },
@@ -2625,7 +2625,7 @@
         "hidden" : false,
         "entry_trigger" : {
             "effects" : {
-                "provides_healing" : "100"
+                "provides_healing" : {"amount": 100}
             }
         }
     },
@@ -2766,7 +2766,7 @@
         },
         "entry_trigger" : {
             "effects" : {
-                "damage" : "6"
+                "damage" : {"amount": 6}
             }
         }
     }
@@ -2777,9 +2777,9 @@
         "name" : "Zap",
         "mana_cost" : 1,
         "effects" : {
-            "ranged" : "6",
-            "damage" : "5",
-            "particle_line" : "▓;#00FFFF;400.0"
+            "ranged" : {"amount": 6},
+            "damage" : {"amount": 5},
+            "particle_line" : {"value": "▓;#00FFFF;400.0"}
         }
     },
 
@@ -2787,10 +2787,10 @@
         "name" : "Web",
         "mana_cost" : 2,
         "effects" : {
-            "ranged" : "6",
-            "slow" : "10",
-            "area_of_effect" : "3",
-            "particle_line" : "☼;#FFFFFF;400.0"
+            "ranged" : {"amount": 6},
+            "slow" : {"amount": 10},
+            "area_of_effect" : {"amount": 3},
+            "particle_line" : {"value": "☼;#FFFFFF;400.0"}
         }
     },
 
@@ -2798,9 +2798,9 @@
         "name" : "Venom",
         "mana_cost" : 2,
         "effects" : {
-            "ranged" : "6",
-            "damage_over_time" : "4",
-            "particle_line" : "▓;#00FF00;400.0"
+            "ranged" : {"amount": 6},
+            "damage_over_time" : {"amount": 4},
+            "particle_line" : {"value": "▓;#00FF00;400.0"} 
         }
     },
 
@@ -2808,10 +2808,10 @@
         "name" : "Acid Breath",
         "mana_cost" : 2,
         "effects" : {
-            "ranged" : "6",
-            "damage" : "10",
-            "area_of_effect" : "3",
-            "particle" : "☼;#00FF00;400.0"
+            "ranged" : {"amount": 6},
+            "damage" : {"amount": 10},
+            "area_of_effect" : {"amount": 3},
+            "particle" : {"value": "☼;#00FF00;400.0"}
         }
     },
 
@@ -2819,12 +2819,12 @@
         "name" : "Explode",
         "mana_cost" : 1,
         "effects" : {
-            "ranged" : "3",
-            "damage" : "20",
-            "area_of_effect" : "3",
-            "particle" : "▒;#FFAA50;400.0",
-            "single_activation" : "1",
-            "target_self" : "1"
+            "ranged" : {"amount": 3},
+            "damage" : {"amount": 20},
+            "area_of_effect" : {"amount": 30},
+            "particle" : {"value": "▒;#FFAA50;400.0"},
+            "single_activation" : {},
+            "target_self" : {}
         }
     },
 
@@ -2832,12 +2832,12 @@
         "name" : "ConfusionCloud",
         "mana_cost" : 1,
         "effects" : {
-            "ranged" : "3",
-            "confusion" : "4",
-            "area_of_effect" : "3",
-            "particle" : "?;#FFFF00;400.0",
-            "single_activation" : "1",
-            "target_self" : "1"
+            "ranged" : {"amount": 3},
+            "confusion" : {"duration": 4},
+            "area_of_effect" : {"amount": 3},
+            "particle" : {"value": "?;#FFFF00;400.0"},
+            "single_activation" : {},
+            "target_self" : {}
         }
     },
 
@@ -2845,12 +2845,12 @@
         "name" : "PoisonCloud",
         "mana_cost" : 1,
         "effects" : {
-            "ranged" : "3",
-            "damage_over_time" : "4",
-            "area_of_effect" : "3",
-            "particle" : "*;#00FF00;400.0",
-            "single_activation" : "1",
-            "target_self" : "1"
+            "ranged" : {"amount": 3},
+            "damage_over_time" : {"amount": 4},
+            "area_of_effect" : {"amount": 3},
+            "particle" : {"value": "*;#00FF00;400.0"},
+            "single_activation" : {},
+            "target_self" : {}
         }
     }
 ],
@@ -2858,11 +2858,11 @@
 "weapon_traits" : [
     {
         "name" : "Venomous",
-        "effects" : { "damage_over_time" : "2" }
+        "effects" : { "damage_over_time" : {"amount": 2} }
     },
     {
         "name" : "Dazzling",
-        "effects" : { "confusion" : "2" }
+        "effects" : { "confusion" : {"duration": 2} }
     }
 ]
 }

@@ -218,22 +218,24 @@ fn random_room_builder(builder : &mut BuilderChain) {
 }
 
 fn random_shape_builder(builder : &mut BuilderChain) {
-    let builder_roll = crate::rng::roll_dice(1, 16);
+    let builder_roll = crate::rng::roll_dice(1, 1);
     match builder_roll {
-        1 => builder.start_with(CellularAutomataBuilder::new()),
-        2 => builder.start_with(DrunkardsWalkBuilder::open_area()),
-        3 => builder.start_with(DrunkardsWalkBuilder::open_halls()),
-        4 => builder.start_with(DrunkardsWalkBuilder::winding_passages()),
-        5 => builder.start_with(DrunkardsWalkBuilder::fat_passages()),
-        6 => builder.start_with(DrunkardsWalkBuilder::fearful_symmetry()),
-        7 => builder.start_with(MazeBuilder::new()),
-        8 => builder.start_with(DLABuilder::walk_inwards()),
-        9 => builder.start_with(DLABuilder::walk_outwards()),
-        10 => builder.start_with(DLABuilder::central_attractor()),
-        11 => builder.start_with(DLABuilder::insectoid()),
-        12 => builder.start_with(VoronoiCellBuilder::pythagoras()),
-        13 => builder.start_with(VoronoiCellBuilder::manhattan()),
-        _ => builder.start_with(PrefabBuilder::constant(prefab_builder::prefab_levels::WFC_POPULATED)),
+        // _ => builder.start_with(CellularAutomataBuilder::new()),
+        // _ => builder.start_with(DrunkardsWalkBuilder::winding_passages()),
+        // _ => builder.start_with(DrunkardsWalkBuilder::open_halls()),
+        // _ => builder.start_with(DrunkardsWalkBuilder::fat_passages()),
+        // _ => builder.start_with(DrunkardsWalkBuilder::fearful_symmetry()),
+        // _ => builder.start_with(DLABuilder::walk_inwards()),
+        // _ => builder.start_with(DLABuilder::central_attractor()),  // Smaller open area
+        // _ => builder.start_with(DLABuilder::insectoid()),
+        _ => builder.start_with(VoronoiCellBuilder::pythagoras()),
+        
+        // _ => builder.start_with(DLABuilder::walk_outwards()),  // Another big open area
+        // _ => builder.start_with(DrunkardsWalkBuilder::open_area()), // TODO - reserve for boss?
+        
+        // 7 => builder.start_with(MazeBuilder::new()),
+        // _ => builder.start_with(PrefabBuilder::constant(prefab_builder::prefab_levels::WFC_POPULATED)),
+        // _ => builder.start_with(VoronoiCellBuilder::manhattan()),
     }
 
     // Set the start to the center and cull
@@ -250,6 +252,35 @@ fn random_shape_builder(builder : &mut BuilderChain) {
 }
 
 pub fn random_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
+    let map_name = "Floor ".to_owned() + &new_depth.to_string();
+    let mut builder = BuilderChain::new(new_depth, width, height, map_name);
+    // let type_roll = crate::rng::roll_dice(1, 2);
+    // match type_roll {
+    //     1 => random_room_builder(&mut builder),
+    //     _ => random_shape_builder(&mut builder)
+    // }
+    random_room_builder(&mut builder);
+    // random_shape_builder(&mut builder);
+
+    // if crate::rng::roll_dice(1, 3)==1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+
+    //     // Now set the start to a random starting area
+    //     let (start_x, start_y) = random_start_position();
+    //     builder.with(AreaStartingPosition::new(start_x, start_y));
+
+    //     // Setup an exit and spawn mobs
+    //     builder.with(VoronoiSpawning::new());
+    //     builder.with(DistantExit::new());
+    // }
+
+
+    builder.with(DoorPlacement::new());
+    // builder.with(PrefabBuilder::vaults());
+
+    builder
+}
+pub fn random_builder2(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth, width, height, "New Map");
     let type_roll = crate::rng::roll_dice(1, 2);
     match type_roll {
@@ -282,18 +313,6 @@ pub fn random_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
 pub fn level_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     rltk::console::log(format!("Depth: {}", new_depth));
     match new_depth {
-        1 => town_builder(new_depth, width, height),
-        2 => forest_builder(new_depth, width, height),
-        3 => forest2_builder(new_depth, width, height),
-        4 => forest_castle_transition_builder(new_depth, width, height),
-
-        5 => limestone_transition_builder(new_depth, width, height),
-        6 => dwarf_fort_builder(new_depth, width, height),
-        7 => mushroom_entrance(new_depth, width, height),
-        8 => mushroom_builder(new_depth, width, height),
-        9 => mushroom_exit(new_depth, width, height),
-        10 => dark_elf_city(new_depth, width, height),
-        11 => dark_elf_plaza(new_depth, width, height),
         _ => random_builder(new_depth, width, height)
     }
 }

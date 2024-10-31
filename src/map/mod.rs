@@ -83,7 +83,7 @@ impl Map {
             bloodstains: HashSet::new(),
             view_blocked : HashSet::new(),
             name : name.to_string(),
-            outdoors : true,
+            outdoors : false,
             light: vec![rltk::RGB::from_f32(0.0, 0.0, 0.0); map_tile_count]
         }
     }

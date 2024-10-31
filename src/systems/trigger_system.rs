@@ -17,7 +17,6 @@ impl<'a> System<'a> for TriggerSystem {
     fn run(&mut self, data : Self::SystemData) {
         let (map, mut entity_moved, position, entry_trigger, 
             names, entities, area_of_effect) = data;
-
         // Iterate the entities that moved and their final position
         for (entity, mut _entity_moved, pos) in (&entities, &mut entity_moved, &position).join() {
             let idx = map.xy_idx(pos.x, pos.y);
@@ -38,7 +37,7 @@ impl<'a> System<'a> for TriggerSystem {
 
                             // Call the effects system
                             add_effect(
-                                Some(entity),
+                                Some(entity_id),
                                 EffectType::TriggerFire{ trigger : entity_id },
                                 if let Some(aoe) = area_of_effect.get(entity_id) {
                                     Targets::Tiles{

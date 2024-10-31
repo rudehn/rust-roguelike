@@ -21,19 +21,33 @@ pub fn tile_glyph(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, RGB) {
         //         get_tile_glyph_default(idx, map)
         //     }
         // }
-        4 => get_forest_glyph(idx, map),
-        3 => get_forest_glyph(idx, map),
-        2 => get_forest_glyph(idx, map),
+        // 4 => get_forest_glyph(idx, map),
+        // 3 => get_forest_glyph(idx, map),
+        // 2 => get_forest_glyph(idx, map),
         _ => get_tile_glyph_default(idx, map)
     };
 
     if map.bloodstains.contains(&idx) { bg = RGB::from_f32(0.75, 0., 0.); }
+    let visibility_mult = 0.08;
     if !map.visible_tiles[idx] {
-        fg = fg.to_greyscale();
-        bg = RGB::from_f32(0., 0., 0.); // Don't show stains out of visual range
+        // fg = fg.desaturate();
+        // fg = fg.to_greyscale();
+
+        fg = fg * visibility_mult;
+        bg = bg * visibility_mult;
+        // bg = bg.desaturate();
+        // bg = RGB::from_f32(0., 0., 0.); // Don't show stains out of visual range
     } else if !map.outdoors {
-        fg = fg * map.light[idx];
-        bg = bg * map.light[idx];
+        // We need to cap the light multiplier to the max of the out-of-view multiplier
+        // Otherwise we end up with a black circle surrounding the player, and then the out-of-view
+        // Tiles are shown
+        let light_mult = RGB::from_f32(
+            f32::max(visibility_mult, map.light[idx].r),
+            f32::max(visibility_mult, map.light[idx].g),
+            f32::max(visibility_mult, map.light[idx].b),
+        );
+        fg = fg * light_mult;
+        bg = bg * light_mult;
     }
 
     (glyph, fg, bg)
@@ -107,16 +121,24 @@ fn get_limestone_cavern_glyph(idx:usize, map: &Map) -> (rltk::FontCharType, RGB,
 fn get_tile_glyph_default(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, RGB) {
     let glyph;
     let fg;
-    let bg = RGB::from_f32(0., 0., 0.);
+    let mut bg = RGB::from_f32(0., 0., 0.);
 
     match map.tiles[idx] {
-        TileType::Floor => { glyph = rltk::to_cp437('.'); fg = RGB::from_f32(0.0, 0.5, 0.5); }
+        TileType::Floor => { 
+            glyph = rltk::to_cp437('.');
+            // fg = RGB::from_u8(0x80, 0x80, 0x80);
+            // bg = RGB::from_u8(0x40, 0x40, 0x40);
+            fg = RGB::named(rltk::DARKGRAY);
+            bg = RGB::named(rltk::GRAY1);
+        }
         TileType::WoodFloor => { glyph = rltk::to_cp437('░'); fg = RGB::named(rltk::CHOCOLATE); }
         TileType::Wall => {
             let x = idx as i32 % map.width;
             let y = idx as i32 / map.width;
-            glyph = wall_glyph(&*map, x, y);
-            fg = RGB::from_f32(0., 1.0, 0.);
+            // glyph = wall_glyph(&*map, x, y);
+            glyph = rltk::to_cp437('#');
+            fg = RGB::from_u8(0x40, 0x40, 0x40);
+            bg = RGB::from_u8(0x80, 0x80, 0x80);
         }
         TileType::DownStairs => { glyph = rltk::to_cp437('>'); fg = RGB::from_f32(0., 1.0, 1.0); }
         TileType::UpStairs => { glyph = rltk::to_cp437('<'); fg = RGB::from_f32(0., 1.0, 1.0); }

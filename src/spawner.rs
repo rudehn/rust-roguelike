@@ -72,18 +72,18 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Shortbow", SpawnType::Carried{by : player});
 
     // Starting hangover
-    ecs.create_entity()
-        .with(StatusEffect{ target : player })
-        .with(Duration{ turns:10 })
-        .with(Name{ name: "Hangover".to_string() })
-        .with(AttributeBonus{
-            might : Some(-1),
-            fitness : None,
-            quickness : Some(-1),
-            intelligence : Some(-1)
-        })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
+    // ecs.create_entity()
+    //     .with(StatusEffect{ target : player })
+    //     .with(Duration{ turns:10 })
+    //     .with(Name{ name: "Hangover".to_string() })
+    //     .with(AttributeBonus{
+    //         might : Some(-1),
+    //         fitness : None,
+    //         quickness : Some(-1),
+    //         intelligence : Some(-1)
+    //     })
+    //     .marked::<SimpleMarker<SerializeMe>>()
+    //     .build();
 
     player
 }

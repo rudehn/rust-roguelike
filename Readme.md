@@ -7,6 +7,47 @@ Progression
   guardian guarding the route to the abandoned dwarf mines. The dwarf mines (11-14) show remnants of the dwarfs fight with the dragon faction, relics of dwarf tech remain. The mines show structured buildings that have been weathered into the cave system, a final miniboss guards the entrance to the dragon lair (15). Inside the dragon layer is a vast cavern with a dragon guarding a locked room with your son. Defeat the dragon and rescue your son
   to finish the game!
 
+Mobs
+- Each mob should have a unique theme, possible themes include
+  - basic melee
+  - basic ranged, single target
+  - debuff
+  - inflict status effect,
+  - AOE 
+  - poison
+  - slow
+  - invisible
+  - glass cannon
+  - cast silence
+  - tough/regenerates, low damage
+  - stun only, but loses 1 hp every time it attacks
+  - parasite, giving positive + negative benefits
+  - spawn amalgamation if too many of same entity type die in same place
+  - an enemy with knockback
+  - enemy with high armor and attack, but very slow
+  - stationary props that have some kind of environmental impact
+- Monsters gain strength through levels by adding prefixes. Prefixes add stats  
+
+- Monsters using items
+- Monsters picking up items
+- Monsters coordinating/boosting other monsters
+- Mimics (appear as another symbol)
+- Demons (appear as &)
+- Types
+  - goblins
+  - orcs
+  - dark elves
+  - dwarves
+  - dragon
+  - bandits
+  - slimes
+  - trolls
+- Bosses
+- Minibosses
+
+Spawning:
+- 
+
 Item
 - Generation
   - items should have an identity
@@ -56,23 +97,6 @@ Combat
 - NO AC, armor mitigates damage
 - damage types; resistances, weaknesses
 
-Mobs
-- Monsters using items
-- Monsters picking up items
-- Monsters coordinating/boosting other monsters
-- Mimics (appear as another symbol)
-- Demons (appear as &)
-- Types
-  - goblins
-  - orcs
-  - dark elves
-  - dwarves
-  - dragon
-  - bandits
-  - slimes
-  - trolls
-- Bosses
-- Minibosses
 
 Damage system:
 - Damage types

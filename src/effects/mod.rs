@@ -83,7 +83,7 @@ fn target_applicator(ecs : &mut World, effect : &mut EffectSpawner) {
     } else if let EffectType::TriggerFire{trigger} = effect.effect_type {
         triggers::trigger(effect.creator, trigger, &effect.targets, ecs);
     } else {
-        match &effect.targets.clone() {
+       match &effect.targets.clone() {
             Targets::Tile{tile_idx} => affect_tile(ecs, effect, *tile_idx),
             Targets::Tiles{tiles} => tiles.iter().for_each(|tile_idx| affect_tile(ecs, effect, *tile_idx)),
             Targets::Single{target} => affect_entity(ecs, effect, *target),
@@ -127,7 +127,7 @@ fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
     }
     effect.dedupe.insert(target);
     match &effect.effect_type {
-        EffectType::Damage{..} => damage::inflict_damage(ecs, effect, target),
+        EffectType::Damage{..} => {damage::inflict_damage(ecs, effect, target); println!("inflicting damage now") },
         EffectType::EntityDeath => damage::death(ecs, effect, target),
         EffectType::Bloodstain{..} => if let Some(pos) = entity_position(ecs, target) { damage::bloodstain(ecs, pos) },
         EffectType::Particle{..} => if let Some(pos) = entity_position(ecs, target) { particles::particle_to_tile(ecs, pos, &effect) },

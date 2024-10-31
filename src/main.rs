@@ -29,7 +29,7 @@ mod systems;
 pub mod rng;
 pub mod spatial;
 
-const SHOW_MAPGEN_VISUALIZER : bool = true;
+const SHOW_MAPGEN_VISUALIZER : bool = false;
 const SHOW_FPS : bool = true;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -466,7 +466,7 @@ fn main() -> rltk::BError {
         .with_sparse_console(80, 30, "vga8x16.png")
         .with_vsync(false)
         .build()?;
-    context.with_post_scanlines(true);
+    // context.with_post_scanlines(true);
     let mut gs = State {
         ecs: World::new(),
         mapgen_next_state : Some(RunState::MainMenu{ menu_selection: gui::MainMenuSelection::NewGame }),

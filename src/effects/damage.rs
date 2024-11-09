@@ -1,28 +1,23 @@
 use specs::prelude::*;
 use super::*;
 use crate::components::{Pools, Player, Attributes, Confusion, SerializeMe, Duration, StatusEffect, 
-    Name, EquipmentChanged, Slow, DamageOverTime, Skills };
+    Name, EquipmentChanged, Slow, DamageOverTime, Skills};
 use crate::map::Map;
-use crate::gamesystem::{player_hp_at_level, mana_at_level};
+use crate::raws::get_challenge_rating_data;
+use crate::gamesystem::{player_hp_at_level, mana_at_level, xp_to_next_level};
 use specs::saveload::{MarkedBuilder, SimpleMarker};
 
 pub fn inflict_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
     let mut pools = ecs.write_storage::<Pools>();
     let player_entity = ecs.fetch::<Entity>();
-    println!("in inflict damage fn");
     if let Some(pool) = pools.get_mut(target) {
-        println!(" I was targeted");
         if !pool.god_mode {
-            println!("I was hit");
             if let Some(creator) = damage.creator {
                 if creator == target { 
-                    println!("somewhow I'm the creator?");
                     return; 
                 }
             }
-            println!("made it here");
             if let EffectType::Damage{amount} = damage.effect_type {
-                println!("I'm hoere too");
                 pool.hit_points.current -= amount;
                 add_effect(None, EffectType::Bloodstain, Targets::Single{target});
                 add_effect(None, 
@@ -70,7 +65,8 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
     if let Some(source) = effect.creator {
         if ecs.read_storage::<Player>().get(source).is_some() {
             if let Some(stats) = pools.get(target) {
-                xp_gain += stats.level * 100;
+
+                xp_gain +=  get_challenge_rating_data(&stats.level).xp_gain;
                 gold_gain += stats.gold;
             }
 
@@ -79,7 +75,7 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                 let mut player_attributes = attributes.get_mut(source).unwrap();
                 player_stats.xp += xp_gain;
                 player_stats.gold += gold_gain;
-                if player_stats.xp >= player_stats.level * 1000 {
+                if player_stats.xp >= xp_to_next_level(player_stats.level + 1) {
                     // We've gone up a level!
                     player_stats.level += 1;
                     crate::gamelog::Logger::new()

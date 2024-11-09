@@ -18,7 +18,6 @@ impl<'a> System<'a> for AdjacentAI {
 
     fn run(&mut self, data : Self::SystemData) {
         let (mut turns, factions, positions, map, mut want_melee, entities, player, sizes) = data;
-
         let mut turn_done : Vec<Entity> = Vec::new();
         for (entity, _turn, my_faction, pos) in (&entities, &turns, &factions, &positions).join() {
             if entity != *player {

@@ -1,11 +1,66 @@
-Progression
-- Start off in town (level 1)
-- A dragon has stolen your son, reach level 15 to defeat the dragon and rescue your son
-- You progress through a forest (levels 2-4, 4 is a transition to castle), arrive at an abandoned castle (level 5) with a miniboss
-  guarding the entrance down into the sewer (level 6) catacombs (level 7) which transition into a narrow passage
-  cave system (8). From there, progress through the cave system (9-10) until you reach reach the miniboss
-  guardian guarding the route to the abandoned dwarf mines. The dwarf mines (11-14) show remnants of the dwarfs fight with the dragon faction, relics of dwarf tech remain. The mines show structured buildings that have been weathered into the cave system, a final miniboss guards the entrance to the dragon lair (15). Inside the dragon layer is a vast cavern with a dragon guarding a locked room with your son. Defeat the dragon and rescue your son
-  to finish the game!
+Basic game play:
+* Win condition
+  - Go down through the dungeon to retrieve the amulet on level 10 and return up the floors and out the dungeon entrance
+  - If you die, game over
+* Progression
+  - Enemies will get stronger over time, so the character will also get stronger through equipment, spells and stat increases
+
+* Map generation
+* Mobs
+  - AI
+    - Sleeping, wandering, chasing, guarding
+* Items
+  * Generation
+* Spells
+* Damage System
+  * Hit Chance
+    - hit_chance = attacker_accuracy * .987 ^ defender_evasion
+    - accuracy = 100; later multiply by 1.065^(enchant level)
+    - evasion = 10 * dex bonus
+  * Damage
+    - damage = roll(dmg_min, dmg_max) - (roll(armor/2, armor) - attacker_pierce)
+      - Min/max damage is from the attackers weapon, natural attack, or 1d4 if unarmed
+      - Armor is from the defenders gear or natural armor
+      - Pierce is an attribute on weapons
+  * Damage types
+    - Physical
+    - Fire
+    - Poison
+  * Resistances/Weakness/Immunities
+  * Status Effects
+    - Burning: 1d3 for 5 turns. Inflicted by any fire attack. Additional fire damage will reset the counter. Stepping into water will extinguish. TODO - implement fire spreading on flammible terrain
+    - Poison: Deal n damage for m turns. Poison stacks, new poison damage is added to the previous amount and the number of turns is increased by the new duration
+* Turn system
+* UI
+  - Items & creatures in view should be displayed on the side
+    - Health & status effects should be displayed
+    - Hovering over these entities should show a detailed description
+  - Hovering over an item or creature on the ground should show a description
+
+
+
+TODO
+Dungeon:
+- BSPDungeon algorithm is broken; Find out why sometimes the map spawns only 1 square
+- Bump into the dungeon exit
+- increase size of screen
+- add a view to print the entire log
+- Display AC value
+thread 'main' panicked at src\map_builders\utility\starting_points.rs:60:13:
+No valid floors to start on
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `target\debug\rust-roguelike.exe` (exit code: 101)
+
+
+
+
+
+
+
+  
+
+
+
 
 Mobs
 - Each mob should have a unique theme, possible themes include
@@ -84,29 +139,6 @@ Item
       - ring
     - modify character's attributes, grant various powers, special ability or resistance. Also they can allow magical power or spell to be activated. 
 
-
-
-Level Design
-- read from files like items
-
-Spells
-
-Skills
-
-Combat
-- NO AC, armor mitigates damage
-- damage types; resistances, weaknesses
-
-
-Damage system:
-- Damage types
-  - Physical, poison, lightning, fire
-  - Hit points, drain mana, drain hunger, stat loss
-
-
-Updates:
-- Make effect duration for spells customizable
-
 Ideas:
   - Lanterns
   - Wand
@@ -137,19 +169,8 @@ Ideas:
   - sleep - skips turn
   - trapped - can't move
   - invisible - can't be seen
+  - Webbed
 
-
-
-Quests
-
-
-https://www.roguebasin.com/index.php/Monster_attacks_in_a_structured_list
-https://www.roguebasin.com/index.php/Monster_attacks
-
-
-Creating a design document: https://bfnightly.bracketproductions.com/rustbook/chapter_44.html
-
-To implement slow with duration, update 'apply_effects' macro to read slow and confusion duration and set the value on the component. Then update `event_trigger` to use the duration value
 
 
 Bugs:
@@ -162,9 +183,7 @@ hungover stats not coming back - encumbrance system is still getting the status,
 damage over time not giving XP - https://github.com/amethyst/rustrogueliketutorial/issues/164
 high level loot spawned on floor 2; might be from magic items
 A* pathfinding is incredibly slow
-traps not doing damage
-vendors can block the exit of buildings
-NPCs get stuck going into doors & then block
+traps sometimes don't activate
 
 HOSTING: https://github.com/amethyst/rustrogueliketutorial/issues/215
 - https://momori.dev/posts/deploying-a-rust-wasm-app-to-github-pages/
@@ -173,8 +192,6 @@ HOSTING: https://github.com/amethyst/rustrogueliketutorial/issues/215
 TileSet - https://en.wikipedia.org/wiki/Code_page_437
 
 Hovering over an item should show stats
-Update graphics - don't do greyscale - divide color by 8 instead
-- tile colors look weird
 
 targeting with bow causes exception
 New title screen
@@ -182,3 +199,34 @@ New title screen
 Goblin archers should try to keep their distance
 Don't drop all of an enemies loot, roll for what drops
 prefab AI should stay where they were placed
+
+
+Converting DND armor stats into this game
+
+Leather armor AC = 1
+Weight: 10
+
+head: 15%
+torso: 40%
+legs: 25%
+feet: 10%
+hands: 10%
+
+TODO
+* Refactor out code from ranged & melee combat systems
+* Update tooltips to display fraction CR
+* Goblins moving 2 spaces / turn
+* Only 1 of a mobs natural attacks are used
+* Combine melee combat and ranged combat systems?
+* Don't drop all of an enemies items, add to loot drop table & roll
+* Display AC
+* Implement 2 handed weapons
+* Add in saving throws for enemy attacks
+* Is hit bonus for natural attacks calculated correctly? IE, is it using a stat bonus, and can it use dex stat? Is it adding in the additional damage from bonus?
+* TODO - implement saving throws
+* TODO - attack damage types
+* TODO - implement "Push" weapon feature - https://www.dndbeyond.com/equipment/6-greatclub
+* Implement troll regeneration; don't regenertate if just took fire damage; new system for effect
+* Implement fire damage
+* Anything in vision range should display on side of screen
+* Increase vision range??

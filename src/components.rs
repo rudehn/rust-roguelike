@@ -170,7 +170,7 @@ pub struct Pools {
     pub hit_points : Pool,
     pub mana : Pool,
     pub xp : i32,
-    pub level : i32,
+    pub level : i32, // Need to store 1/8, 1/4, and 1/2 challenge rating as negative numbers
     pub total_weight : f32,
     pub total_initiative_penalty : f32,
     pub gold : f32,
@@ -369,13 +369,11 @@ pub struct Equipped {
     pub slot : EquipmentSlot
 }
 
-#[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
-pub enum WeaponAttribute { Might, Quickness }
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Weapon {
     pub range : Option<i32>,
-    pub attribute : WeaponAttribute,
+    pub finesse : bool,
     pub damage_n_dice : i32,
     pub damage_die_type : i32,
     pub damage_bonus : i32,

@@ -17,7 +17,8 @@ pub fn clear_log() {
 pub fn print_log(console: &mut Box<dyn Console>, pos: Point) {
     let mut y = pos.y;
     let mut x = pos.x;
-    LOG.lock().unwrap().iter().rev().take(6).for_each(|log| {
+    // Grab the last 6 messages, then reverse to print them so the most recent is at the bottom
+    LOG.lock().unwrap().iter().rev().take(6).rev().for_each(|log| {
         log.iter().for_each(|frag| {
             console.print_color(x, y, frag.color.to_rgba(1.0), RGBA::named(rltk::BLACK), &frag.text);
             x += frag.text.len() as i32;

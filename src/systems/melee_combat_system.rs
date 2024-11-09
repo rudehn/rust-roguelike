@@ -1,8 +1,9 @@
 use specs::prelude::*;
 use crate::{Attributes, Skills, WantsToMelee, Name,
     HungerClock, HungerState, Pools, skill_bonus,
-    Skill, Equipped, Weapon, EquipmentSlot, WeaponAttribute, Wearable, NaturalAttackDefense,
+    Skill, Equipped, Weapon, EquipmentSlot, Wearable, NaturalAttackDefense,
     effects::*};
+use crate::raws::get_challenge_rating_data;
 
 pub struct MeleeCombatSystem {}
 
@@ -24,19 +25,20 @@ impl<'a> System<'a> for MeleeCombatSystem {
     fn run(&mut self, data : Self::SystemData) {
         let (entities, mut wants_melee, names, attributes, skills,
             hunger_clock, pools, equipped_items, weapon, wearables, natural) = data;
-
-        for (entity, wants_melee, name, attacker_attributes, attacker_skills, attacker_pools) in (&entities, &wants_melee, &names, &attributes, &skills, &pools).join() {
+        
+        for (entity, wants_melee, name, attacker_attributes, attacker_pools) in (&entities, &wants_melee, &names, &attributes, &pools).join() {
             // Are the attacker and defender alive? Only attack if they are
+            println!("Somebody wants to attack!");
             let target_pools = pools.get(wants_melee.target).unwrap();
             let target_attributes = attributes.get(wants_melee.target).unwrap();
-            let target_skills = skills.get(wants_melee.target).unwrap();
             if attacker_pools.hit_points.current > 0 && target_pools.hit_points.current > 0 {
                 let target_name = names.get(wants_melee.target).unwrap();
+                println!("I'm attacking!");
 
                 // Define the basic unarmed attack - overridden by wielding check below if a weapon is equipped
                 let mut weapon_info = Weapon{
                     range: None,
-                    attribute : WeaponAttribute::Might,
+                    finesse: false,
                     hit_bonus : 0,
                     damage_n_dice : 1,
                     damage_die_type : 4,
@@ -64,10 +66,15 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 }
 
                 let natural_roll = crate::rng::roll_dice(1, 20);
-                let attribute_hit_bonus = if weapon_info.attribute == WeaponAttribute::Might
-                    { attacker_attributes.might.bonus }
-                    else { attacker_attributes.quickness.bonus};
-                let skill_hit_bonus = skill_bonus(Skill::Melee, &*attacker_skills);
+                // Weapons use the Might stat unless it's a finesse weapon, then it can also use Quickness
+                let attribute_bonus_stat = if weapon_info.finesse
+                    { i32::max(attacker_attributes.might.bonus, attacker_attributes.quickness.bonus) }
+                    else { attacker_attributes.might.bonus};
+                
+                let mut skill_bonus_stat = 0;
+                if let Some(attacker_skills) = skills.get(entity) {
+                    skill_bonus_stat = skill_bonus(Skill::Melee, &*attacker_skills);
+                }
                 let weapon_hit_bonus = weapon_info.hit_bonus;
                 let mut status_hit_bonus = 0;
                 if let Some(hc) = hunger_clock.get(entity) { // Well-Fed grants +1
@@ -75,8 +82,9 @@ impl<'a> System<'a> for MeleeCombatSystem {
                         status_hit_bonus += 1;
                     }
                 }
-                let modified_hit_roll = natural_roll + attribute_hit_bonus + skill_hit_bonus
-                    + weapon_hit_bonus + status_hit_bonus;
+                let proficiency_hit_bonus = get_challenge_rating_data(&attacker_pools.level).proficiency_bonus;
+                let modified_hit_roll = natural_roll + attribute_bonus_stat + skill_bonus_stat
+                    + proficiency_hit_bonus + weapon_hit_bonus + status_hit_bonus;
                 //println!("Natural roll: {}", natural_roll);
                 //println!("Modified hit roll: {}", modified_hit_roll);
 
@@ -91,7 +99,11 @@ impl<'a> System<'a> for MeleeCombatSystem {
                     Some(nat) => nat.armor_class.unwrap_or(10)
                 };
                 let armor_quickness_bonus = target_attributes.quickness.bonus;
-                let armor_skill_bonus = skill_bonus(Skill::Defense, &*target_skills);
+                
+                let mut armor_skill_bonus = 0;
+                if let Some(target_skills) = skills.get(wants_melee.target){
+                    armor_skill_bonus = skill_bonus(Skill::Defense, &*target_skills);
+                }
                 let armor_item_bonus = armor_item_bonus_f as i32;
                 let armor_class = base_armor_class + armor_quickness_bonus + armor_skill_bonus
                     + armor_item_bonus;
@@ -100,17 +112,14 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 if natural_roll != 1 && (natural_roll == 20 || modified_hit_roll > armor_class) {
                     // Target hit! Until we support weapons, we're going with 1d4
                     let base_damage = crate::rng::roll_dice(weapon_info.damage_n_dice, weapon_info.damage_die_type);
-                    let attr_damage_bonus = attacker_attributes.might.bonus;
-                    let skill_damage_bonus = skill_bonus(Skill::Melee, &*attacker_skills);
                     let weapon_damage_bonus = weapon_info.damage_bonus;
 
-                    let damage = i32::max(0, base_damage + attr_damage_bonus + 
-                        skill_damage_bonus + weapon_damage_bonus);
-
-                    /*println!("Damage: {} + {}attr + {}skill + {}weapon = {}",
-                        base_damage, attr_damage_bonus, skill_damage_bonus,
+                    let damage = i32::max(0, base_damage + attribute_bonus_stat + 
+                        skill_bonus_stat + weapon_damage_bonus);
+                    println!("Damage: {} + {}attr + {}skill + {}weapon = {}",
+                        base_damage, attribute_bonus_stat, skill_bonus_stat,
                         weapon_damage_bonus, damage
-                    );*/
+                    );
                     add_effect(
                         Some(entity),
                         EffectType::Damage{ amount: damage },

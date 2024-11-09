@@ -3,7 +3,7 @@ use specs::prelude::*;
 use crate::components::*;
 use super::{Raws, faction_structs::Reaction};
 use crate::random_table::{MasterTable, RandomTable};
-use crate::{attr_bonus, npc_hp, mana_at_level};
+use crate::{attr_bonus, mana_at_level};
 use regex::Regex;
 use specs::saveload::{MarkedBuilder, SimpleMarker};
 use super::EffectValues;
@@ -37,6 +37,12 @@ pub enum SpawnType {
     Carried { by: Entity }
 }
 
+#[derive(Copy, Clone)]
+pub struct CRData {
+    pub xp_gain: i32,
+    pub proficiency_bonus: i32
+}
+
 pub struct RawMaster {
     raws : Raws,
     item_index : HashMap<String, usize>,
@@ -44,7 +50,8 @@ pub struct RawMaster {
     prop_index : HashMap<String, usize>,
     loot_index : HashMap<String, usize>,
     faction_index : HashMap<String, HashMap<String, Reaction>>,
-    spell_index : HashMap<String, usize>
+    spell_index : HashMap<String, usize>,
+    cr_index : HashMap<i32, CRData>
 }
 
 struct NewMagicItem {
@@ -63,14 +70,16 @@ impl RawMaster {
                 loot_tables: Vec::new(),
                 faction_table : Vec::new(),
                 spells : Vec::new(),
-                weapon_traits : Vec::new()
+                weapon_traits : Vec::new(),
+                challenge_ratings : Vec::new()
             },
             item_index : HashMap::new(),
             mob_index : HashMap::new(),
             prop_index : HashMap::new(),
             loot_index : HashMap::new(),
             faction_index : HashMap::new(),
-            spell_index : HashMap::new()
+            spell_index : HashMap::new(),
+            cr_index : HashMap::new()
         }
     }
 
@@ -240,6 +249,11 @@ impl RawMaster {
             self.faction_index.insert(faction.name.clone(), reactions);
         }
 
+        for challenge_rating in self.raws.challenge_ratings.iter() {
+            self.cr_index.insert(challenge_rating.challenge_rating,
+                CRData{ xp_gain: challenge_rating.xp_gain, proficiency_bonus: challenge_rating.proficiency_bonus});
+        }
+
         for (i,spell) in self.raws.spells.iter().enumerate() {
             self.spell_index.insert(spell.name.clone(), i);
         }
@@ -298,6 +312,14 @@ pub fn get_vendor_items(categories: &[String], raws : &RawMaster) -> Vec<(String
     }
 
     result
+}
+
+pub fn get_challenge_rating_data(challenge_rating: &i32) -> CRData {
+    let raws = &super::RAWS.lock().unwrap();
+    match raws.cr_index.get(challenge_rating) {
+        Some(&d) => d,
+        None => CRData{xp_gain: 0, proficiency_bonus: 0}
+    }
 }
 
 pub fn get_scroll_tags() -> Vec<String> {
@@ -465,9 +487,13 @@ pub fn spawn_named_item(raws: &RawMaster, ecs : &mut World, key : &str, pos : Sp
         if let Some(weapon) = &item_template.weapon {
             eb = eb.with(Equippable{ slot: EquipmentSlot::Melee });
             let (n_dice, die_type, bonus) = parse_dice_string(&weapon.base_damage);
+            let mut finesse = false;
+            if let Some(properties) = &weapon.properties {
+                finesse = properties.contains(&"finesse".to_string());
+            }
             let mut wpn = Weapon{
                 range : if weapon.range == "melee" { None } else { Some(weapon.range.parse::<i32>().expect("Not a number")) },
-                attribute : WeaponAttribute::Might,
+                finesse : finesse,
                 damage_n_dice : n_dice,
                 damage_die_type : die_type,
                 damage_bonus : bonus,
@@ -475,10 +501,6 @@ pub fn spawn_named_item(raws: &RawMaster, ecs : &mut World, key : &str, pos : Sp
                 proc_chance : weapon.proc_chance,
                 proc_target : weapon.proc_target.clone()
             };
-            match weapon.attribute.as_str() {
-                "Quickness" => wpn.attribute = WeaponAttribute::Quickness,
-                _ => wpn.attribute = WeaponAttribute::Might
-            }
             eb = eb.with(wpn);
             if let Some(proc_effects) =& weapon.proc_effects {
                 apply_effects!(proc_effects, eb);
@@ -571,13 +593,13 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
             eb = eb.with(BlocksTile{});
         }
 
-        let mut mob_fitness = 11;
-        let mut mob_int = 11;
+        let mut mob_fitness = 10;
+        let mut mob_int = 10;
         let mut attr = Attributes{
-            might: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            fitness: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            quickness: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            intelligence: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
+            might: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            fitness: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            quickness: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            intelligence: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
         };
         if let Some(might) = mob_template.attributes.might {
             attr.might = Attribute{ base: might, modifiers: 0, bonus: attr_bonus(might) };
@@ -595,8 +617,10 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
         }
         eb = eb.with(attr);
 
-        let mob_level = if mob_template.level.is_some() { mob_template.level.unwrap() } else { 1 };
-        let mob_hp = npc_hp(mob_fitness, mob_level);
+        let mob_level = mob_template.challenge_rating;
+        let (n_dice, die_type, bonus) = parse_dice_string(&mob_template.health);
+        let base_health = crate::rng::roll_dice(n_dice, die_type);
+        let mob_hp = base_health + bonus;
         let mob_mana = mana_at_level(mob_int, mob_level);
 
         let pools = Pools{
@@ -616,22 +640,6 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
         };
         eb = eb.with(pools);
         eb = eb.with(EquipmentChanged{});
-
-        let mut skills = Skills{ skills: HashMap::new() };
-        skills.skills.insert(Skill::Melee, 1);
-        skills.skills.insert(Skill::Defense, 1);
-        skills.skills.insert(Skill::Magic, 1);
-        if let Some(mobskills) = &mob_template.skills {
-            for sk in mobskills.iter() {
-                match sk.0.as_str() {
-                    "Melee" => { skills.skills.insert(Skill::Melee, *sk.1); }
-                    "Defense" => { skills.skills.insert(Skill::Defense, *sk.1); }
-                    "Magic" => { skills.skills.insert(Skill::Magic, *sk.1); }
-                    _ => { rltk::console::log(format!("Unknown skill referenced: [{}]", sk.0)); }
-                }
-            }
-        }
-        eb = eb.with(skills);
 
         eb = eb.with(Viewshed{ visible_tiles : Vec::new(), range: mob_template.vision_range, dirty: true });
 

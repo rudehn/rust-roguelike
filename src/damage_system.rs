@@ -27,7 +27,7 @@ pub fn delete_the_dead(ecs : &mut World) {
                     }
                     Some(_) => {
                         let mut runstate = ecs.write_resource::<RunState>();
-                        *runstate = RunState::GameOver;
+                        *runstate = RunState::GameOver{won: false};
                     }
                 }
             }

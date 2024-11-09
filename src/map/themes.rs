@@ -141,6 +141,7 @@ fn get_tile_glyph_default(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, R
             bg = RGB::from_u8(0x80, 0x80, 0x80);
         }
         TileType::DownStairs => { glyph = rltk::to_cp437('>'); fg = RGB::from_f32(0., 1.0, 1.0); }
+        TileType::DungeonExit => { glyph = rltk::to_cp437('Ω'); fg = RGB::from_f32(1.0, 1.0, 1.0); }
         TileType::UpStairs => { glyph = rltk::to_cp437('<'); fg = RGB::from_f32(0., 1.0, 1.0); }
         TileType::Bridge => { glyph = rltk::to_cp437('.'); fg = RGB::named(rltk::CHOCOLATE); }
         TileType::Road => { glyph = rltk::to_cp437('≡'); fg = RGB::named(rltk::GRAY); }

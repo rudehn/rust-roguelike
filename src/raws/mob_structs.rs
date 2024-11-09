@@ -10,10 +10,11 @@ pub struct Mob {
     pub vision_range : i32,
     pub movement : String,
     pub quips : Option<Vec<String>>,
+    pub challenge_rating : i32,
+    pub health : String,
     pub attributes : MobAttributes,
+    pub xp: Option<i32>,
     pub skills : Option<HashMap<String, i32>>,
-    pub level : Option<i32>,
-    pub hp : Option<i32>,
     pub mana : Option<i32>,
     pub equipped : Option<Vec<String>>,
     pub natural : Option<MobNatural>,
@@ -60,4 +61,11 @@ pub struct MobAbility {
     pub chance : f32,
     pub range : f32,
     pub min_range : f32
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ChallengeRating {
+    pub challenge_rating : i32,
+    pub xp_gain: i32,
+    pub proficiency_bonus: i32
 }

@@ -49,7 +49,7 @@ pub enum RunState {
     PreviousLevel,
     TownPortal,
     ShowRemoveItem,
-    GameOver,
+    GameOver { won: bool },
     MagicMapReveal { row : i32 },
     MapGeneration,
     ShowCheatMenu,
@@ -323,8 +323,8 @@ impl GameState for State {
                     }
                 }
             }
-            RunState::GameOver => {
-                let result = gui::game_over(ctx);
+            RunState::GameOver{won} => {
+                let result = gui::game_over(ctx, won);
                 match result {
                     gui::GameOverResult::NoSelection => {}
                     gui::GameOverResult::QuitToMenu => {
@@ -450,7 +450,10 @@ impl State {
         gamelog::Logger::new()
             .append("Welcome to")
             .color(rltk::CYAN)
-            .append("Rusty Roguelike")
+            .append("Caverns Descent")
+            .log();
+        gamelog::Logger::new()
+            .append(format!("Descend the cavern to retrieve the Amulet of Endulo on floor {}", map_builders::AMULET_LEVEL))
             .log();
 
         gamelog::clear_events();
@@ -459,9 +462,9 @@ impl State {
 
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
-    let mut context = RltkBuilder::simple(80, 60)
+    let context = RltkBuilder::simple(80, 60)
         .unwrap()
-        .with_title("Roguelike Tutorial")
+        .with_title("Caverns Descent")
         .with_font("vga8x16.png", 8, 16)
         .with_sparse_console(80, 30, "vga8x16.png")
         .with_vsync(false)

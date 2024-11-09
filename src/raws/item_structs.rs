@@ -37,9 +37,9 @@ pub struct Consumable {
 #[derive(Deserialize, Debug, Clone)]
 pub struct Weapon {
     pub range: String,
-    pub attribute: String,
     pub base_damage: String,
     pub hit_bonus: i32,
+    pub properties : Option<Vec<String>>,
     pub proc_chance : Option<f32>,
     pub proc_target : Option<String>,
     pub proc_effects : Option<HashMap<String, EffectValues>>

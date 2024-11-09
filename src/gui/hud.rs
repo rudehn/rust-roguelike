@@ -2,7 +2,7 @@ use rltk::prelude::*;
 use specs::prelude::*;
 use crate::{Pools, Map, Name, InBackpack,
     Equipped, HungerClock, HungerState, Attributes, Attribute, Consumable,
-    StatusEffect, Duration, KnownSpells, Weapon, gamelog };
+    StatusEffect, Duration, KnownSpells, Weapon, gamelog, gamesystem::xp_to_next_level };
 use super::{draw_tooltips, get_item_display_name, get_item_color};
 
 fn draw_attribute(name : &str, attribute : &Attribute, y : i32, draw_batch: &mut DrawBatch) {
@@ -58,7 +58,7 @@ fn draw_stats(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
     let player_pools = pools.get(*player_entity).unwrap();
     let health = format!("Health: {}/{}", player_pools.hit_points.current, player_pools.hit_points.max);
     let mana =   format!("Mana:   {}/{}", player_pools.mana.current, player_pools.mana.max);
-    let xp =     format!("Level:  {}", player_pools.level);
+    let xp =     format!("Level:  {}", player_pools.level as i32);
     draw_batch.print_color(Point::new(50, 1), &health, ColorPair::new(white, black));
     draw_batch.print_color(Point::new(50, 2), &mana, ColorPair::new(white, black));
     draw_batch.print_color(Point::new(50, 3), &xp, ColorPair::new(white, black));
@@ -76,7 +76,7 @@ fn draw_stats(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
         player_pools.mana.max, 
         ColorPair::new(RGB::named(rltk::BLUE), RGB::named(rltk::BLACK))
     );
-    let xp_level_start = (player_pools.level-1) * 1000;
+    let xp_level_start = xp_to_next_level(player_pools.level as i32);
     draw_batch.bar_horizontal(
         Point::new(64, 3), 
         14, 

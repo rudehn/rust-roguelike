@@ -175,9 +175,6 @@ fn transition_to_existing_map(ecs: &mut World, new_depth: i32, offset: i32) {
             if let Some(player_pos_comp) = player_pos_comp {
                 player_pos_comp.x = idx as i32 % w;
                 player_pos_comp.y = idx as i32 / w;
-                if new_depth == 1 {
-                    player_pos_comp.x -= 1;
-                }
             }
         }
     }
@@ -240,10 +237,16 @@ pub fn thaw_level_entities(ecs: &mut World) {
 
 pub fn level_transition(ecs : &mut World, new_depth: i32, offset: i32) -> Option<Vec<Map>> {
     // Obtain the master dungeon map
-    let dungeon_master = ecs.read_resource::<MasterDungeonMap>();
-
+    let mut dungeon_master = ecs.write_resource::<MasterDungeonMap>();
+    let have_map = dungeon_master.get_map(new_depth).is_some();
+    // Save the revealed tiles for the current map. They aren't saved by default since
+    // The MasterDungeonMap only has a copy of the initially created map
+    {
+        let map = ecs.fetch::<Map>();
+        dungeon_master.store_map(&map);
+    }
     // Do we already have a map?
-    if dungeon_master.get_map(new_depth).is_some() {
+    if have_map {
         std::mem::drop(dungeon_master);
         transition_to_existing_map(ecs, new_depth, offset);
         None

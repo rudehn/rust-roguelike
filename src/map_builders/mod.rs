@@ -24,9 +24,8 @@ use algorithms::voronoi_spawning::VoronoiSpawning;
 use waveform_collapse::WaveformCollapseBuilder;
 use prefab_builder::PrefabBuilder;
 use utility::room_based_spawner::RoomBasedSpawner;
-use utility::room_based_starting_position::RoomBasedStartingPosition;
 use utility::room_based_stairs::RoomBasedStairs;
-use utility::area_starting_points::{AreaStartingPosition, XStart, YStart};
+use utility::starting_points::{AreaStartingPosition, DungeonEntranceSpawner, RoomBasedStartingPosition, XStart, YStart};
 use utility::cull_unreachable::CullUnreachable;
 use common::*;
 use utility::room_exploder::RoomExploder;
@@ -39,6 +38,7 @@ use utility::rooms_corridors_nearest::NearestCorridors;
 use utility::rooms_corridors_lines::StraightLineCorridors;
 use utility::room_corridor_spawner::CorridorSpawner;
 use utility::door_placement::DoorPlacement;
+use utility::amulet_spawner::AmuletSpawner;
 use levels::town::town_builder;
 use utility::area_ending_point::*;
 use levels::mushroom_forest::*;
@@ -53,6 +53,12 @@ pub struct BuilderMap {
     pub history : Vec<Map>,
     pub width: i32,
     pub height: i32
+}
+
+pub const AMULET_LEVEL: i32 = 10;
+
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>());
 }
 
 impl BuilderMap {
@@ -155,9 +161,9 @@ fn random_start_position() -> (XStart, YStart) {
 fn random_room_builder(builder : &mut BuilderChain) {
     let build_roll = crate::rng::roll_dice(1, 3);
     match build_roll {
-        1 => builder.start_with(SimpleMapBuilder::new()),
-        2 => builder.start_with(BspDungeonBuilder::new()),
-        _ => builder.start_with(BspInteriorBuilder::new())
+        _ => {println!("SimpleMapBuilder"); builder.start_with(SimpleMapBuilder::new())} ,
+        //_ => {println!("BspDungeonBuilder"); builder.start_with(BspDungeonBuilder::new())},
+        // _ => builder.start_with(BspInteriorBuilder::new())
     }
 
     // BSP Interior still makes holes in the walls
@@ -176,12 +182,13 @@ fn random_room_builder(builder : &mut BuilderChain) {
 
         let corridor_roll = crate::rng::roll_dice(1, 4);
         match corridor_roll {
-            1 => builder.with(DoglegCorridors::new()),
-            2 => builder.with(NearestCorridors::new()),
-            3 => builder.with(StraightLineCorridors::new()),
-            _ => builder.with(BspCorridors::new())
+            // _ => builder.with(DoglegCorridors::new()),
+            _ => builder.with(NearestCorridors::new()),
+            // _ => builder.with(StraightLineCorridors::new()),
+            // _ => builder.with(BspCorridors::new())
         }
 
+        // Spawn entities in corridors
         let cspawn_roll = crate::rng::roll_dice(1, 2);
         if cspawn_roll == 1 {
             builder.with(CorridorSpawner::new());
@@ -204,11 +211,17 @@ fn random_room_builder(builder : &mut BuilderChain) {
         }
     }
 
-    let exit_roll = crate::rng::roll_dice(1, 2);
-    match exit_roll {
-        1 => builder.with(RoomBasedStairs::new()),
-        _ => builder.with(DistantExit::new())
+    match builder.build_data.map.depth {
+        AMULET_LEVEL => builder.with(AmuletSpawner::new()),
+        _ => {
+            let exit_roll = crate::rng::roll_dice(1, 2);
+            match exit_roll {
+                1 => builder.with(RoomBasedStairs::new()),
+                _ => builder.with(DistantExit::new())
+            }
+        }
     }
+    
 
     let spawn_roll = crate::rng::roll_dice(1, 2);
     match spawn_roll {
@@ -218,17 +231,17 @@ fn random_room_builder(builder : &mut BuilderChain) {
 }
 
 fn random_shape_builder(builder : &mut BuilderChain) {
-    let builder_roll = crate::rng::roll_dice(1, 1);
+    let builder_roll = crate::rng::roll_dice(1, 9);
     match builder_roll {
-        // _ => builder.start_with(CellularAutomataBuilder::new()),
-        // _ => builder.start_with(DrunkardsWalkBuilder::winding_passages()),
-        // _ => builder.start_with(DrunkardsWalkBuilder::open_halls()),
-        // _ => builder.start_with(DrunkardsWalkBuilder::fat_passages()),
-        // _ => builder.start_with(DrunkardsWalkBuilder::fearful_symmetry()),
-        // _ => builder.start_with(DLABuilder::walk_inwards()),
-        // _ => builder.start_with(DLABuilder::central_attractor()),  // Smaller open area
-        // _ => builder.start_with(DLABuilder::insectoid()),
-        _ => builder.start_with(VoronoiCellBuilder::pythagoras()),
+        1 => {println!("CellularAutomataBuilder"); builder.start_with(CellularAutomataBuilder::new())},
+        2 => {println!("DrunkardsWalkBuilder::winding_passages"); builder.start_with(DrunkardsWalkBuilder::winding_passages())},
+        3 => {println!("DrunkardsWalkBuilder::open_halls"); builder.start_with(DrunkardsWalkBuilder::open_halls())},
+        4 => {println!("DrunkardsWalkBuilder::fat_passages"); builder.start_with(DrunkardsWalkBuilder::fat_passages())},
+        5 => {println!("DrunkardsWalkBuilder::fearful_symmetry"); builder.start_with(DrunkardsWalkBuilder::fearful_symmetry())},
+        6 => {println!("DLABuilder::walk_inwards"); builder.start_with(DLABuilder::walk_inwards())},
+        7 => {println!("DLABuilder::central_attractor"); builder.start_with(DLABuilder::central_attractor())},  // Smaller open area
+        8 => {println!("DLABuilder::insectoid"); builder.start_with(DLABuilder::insectoid())},
+        _ => {println!("VoronoiCellBuilder::pythagoras"); builder.start_with(VoronoiCellBuilder::pythagoras())},
         
         // _ => builder.start_with(DLABuilder::walk_outwards()),  // Another big open area
         // _ => builder.start_with(DrunkardsWalkBuilder::open_area()), // TODO - reserve for boss?
@@ -248,19 +261,21 @@ fn random_shape_builder(builder : &mut BuilderChain) {
 
     // Setup an exit and spawn mobs
     builder.with(VoronoiSpawning::new());
-    builder.with(DistantExit::new());
+    match builder.build_data.map.depth {
+        AMULET_LEVEL => builder.with(AmuletSpawner::new()),
+        _ => builder.with(DistantExit::new()),
+    }
+    
 }
 
 pub fn random_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     let map_name = "Floor ".to_owned() + &new_depth.to_string();
     let mut builder = BuilderChain::new(new_depth, width, height, map_name);
-    // let type_roll = crate::rng::roll_dice(1, 2);
-    // match type_roll {
-    //     1 => random_room_builder(&mut builder),
-    //     _ => random_shape_builder(&mut builder)
-    // }
-    random_room_builder(&mut builder);
-    // random_shape_builder(&mut builder);
+    let type_roll = crate::rng::roll_dice(1, 2);
+    match type_roll {
+        1 => random_room_builder(&mut builder),
+        _ => random_shape_builder(&mut builder)
+    }
 
     // if crate::rng::roll_dice(1, 3)==1 {
     //     builder.with(WaveformCollapseBuilder::new());
@@ -273,40 +288,13 @@ pub fn random_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     //     builder.with(VoronoiSpawning::new());
     //     builder.with(DistantExit::new());
     // }
+    if builder.build_data.map.depth == 1 {
+        builder.with(DungeonEntranceSpawner::new());
+    }
 
 
     builder.with(DoorPlacement::new());
     // builder.with(PrefabBuilder::vaults());
-
-    builder
-}
-pub fn random_builder2(new_depth: i32, width: i32, height: i32) -> BuilderChain {
-    let mut builder = BuilderChain::new(new_depth, width, height, "New Map");
-    let type_roll = crate::rng::roll_dice(1, 2);
-    match type_roll {
-        1 => random_room_builder(&mut builder),
-        _ => random_shape_builder(&mut builder)
-    }
-
-    if crate::rng::roll_dice(1, 3)==1 {
-        builder.with(WaveformCollapseBuilder::new());
-
-        // Now set the start to a random starting area
-        let (start_x, start_y) = random_start_position();
-        builder.with(AreaStartingPosition::new(start_x, start_y));
-
-        // Setup an exit and spawn mobs
-        builder.with(VoronoiSpawning::new());
-        builder.with(DistantExit::new());
-    }
-
-    if crate::rng::roll_dice(1, 20)==1 {
-        builder.with(PrefabBuilder::sectional(prefab_builder::prefab_sections::UNDERGROUND_FORT));
-    }
-
-    builder.with(DoorPlacement::new());
-    builder.with(PrefabBuilder::vaults());
-
     builder
 }
 
@@ -316,20 +304,20 @@ pub fn level_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
         _ => random_builder(new_depth, width, height)
     }
 }
-pub fn level_builder2(new_depth: i32, width: i32, height: i32) -> BuilderChain {
-    rltk::console::log(format!("Depth: {}", new_depth));
-    match new_depth {
-        1 => town_builder(new_depth, width, height),
-        2 => forest_builder(new_depth, width, height),
-        3 => limestone_cavern_builder(new_depth, width, height),
-        4 => limestone_deep_cavern_builder(new_depth, width, height),
-        5 => limestone_transition_builder(new_depth, width, height),
-        6 => dwarf_fort_builder(new_depth, width, height),
-        7 => mushroom_entrance(new_depth, width, height),
-        8 => mushroom_builder(new_depth, width, height),
-        9 => mushroom_exit(new_depth, width, height),
-        10 => dark_elf_city(new_depth, width, height),
-        11 => dark_elf_plaza(new_depth, width, height),
-        _ => random_builder(new_depth, width, height)
-    }
-}
+// pub fn level_builder2(new_depth: i32, width: i32, height: i32) -> BuilderChain {
+//     rltk::console::log(format!("Depth: {}", new_depth));
+//     match new_depth {
+//         1 => town_builder(new_depth, width, height),
+//         2 => forest_builder(new_depth, width, height),
+//         3 => limestone_cavern_builder(new_depth, width, height),
+//         4 => limestone_deep_cavern_builder(new_depth, width, height),
+//         5 => limestone_transition_builder(new_depth, width, height),
+//         6 => dwarf_fort_builder(new_depth, width, height),
+//         7 => mushroom_entrance(new_depth, width, height),
+//         8 => mushroom_builder(new_depth, width, height),
+//         9 => mushroom_exit(new_depth, width, height),
+//         10 => dark_elf_city(new_depth, width, height),
+//         11 => dark_elf_plaza(new_depth, width, height),
+//         _ => random_builder(new_depth, width, height)
+//     }
+// }

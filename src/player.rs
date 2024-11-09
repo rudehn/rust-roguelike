@@ -5,7 +5,7 @@ use super::{Position, Player, Viewshed, State, Map, RunState, Attributes, WantsT
     WantsToPickupItem, TileType, HungerClock, HungerState,
     EntityMoved, Door, BlocksTile, BlocksVisibility, Renderable, Pools, Faction,
     raws::Reaction, Vendor, VendorMode, WantsToCastSpell, Target, Equipped, Weapon,
-    WantsToShoot, Name};
+    WantsToShoot, Name, InBackpack};
 
 fn get_player_target_list(ecs : &mut World) -> Vec<(f32,Entity)> {
     let mut possible_targets : Vec<(f32,Entity)> = Vec::new();
@@ -182,7 +182,6 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
             }
             None
         });
-
         if !crate::spatial::is_blocked(destination_idx) {
             pos.x = min(map.width-1 , max(0, pos.x + delta_x));
             pos.y = min(map.height-1, max(0, pos.y + delta_y));
@@ -196,7 +195,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
             match map.tiles[destination_idx] {
                 TileType::DownStairs => result = RunState::NextLevel,
                 TileType::UpStairs => result = RunState::PreviousLevel,
-                _ => {}
+                _ => {},
             }
         }
     }
@@ -224,15 +223,45 @@ pub fn try_next_level(ecs: &mut World) -> bool {
     }
 }
 
+pub fn try_exit_dungeon(ecs: &mut World) -> bool {
+    let player_pos = ecs.fetch::<Point>();
+    let player_entity = ecs.fetch::<Entity>();
+    let map = ecs.fetch::<Map>();
+    let player_idx = map.xy_idx(player_pos.x, player_pos.y);
+    let names = ecs.read_storage::<Name>();
+    let backpack = ecs.read_storage::<InBackpack>();
+    // Check if the amulet is in the player inventory
+    let mut have_amulet = false;
+    for (_backpack, name) in (&backpack, &names).join().filter(|item| item.0.owner == *player_entity ){
+        if name.name.clone() == "Amulet of Endulo" {
+            have_amulet = true;
+        }
+    }
+    
+    match map.tiles[player_idx]{
+        TileType::DungeonExit => {
+            if have_amulet {
+                true
+            } else{
+                crate::gamelog::Logger::new().append("You need to find the amulet to escape the dungeon").log();
+                false
+            }
+        },
+        _ => {false}
+    }
+}
+
 pub fn try_previous_level(ecs: &mut World) -> bool {
     let player_pos = ecs.fetch::<Point>();
     let map = ecs.fetch::<Map>();
     let player_idx = map.xy_idx(player_pos.x, player_pos.y);
-    if map.tiles[player_idx] == TileType::UpStairs {
-        true
-    } else {
-        crate::gamelog::Logger::new().append("There is no way up from here.").log();
-        false
+    match map.tiles[player_idx]{
+        TileType::UpStairs => true,
+        TileType::DungeonExit => false, // Handled in the try_exit_dungeon function
+        _ => {
+            crate::gamelog::Logger::new().append("There is no way up from here.").log();
+            false
+        }
     }
 }
 
@@ -454,7 +483,10 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                 }
             }
             VirtualKeyCode::Comma => {
-                if try_previous_level(&mut gs.ecs) {
+                if try_exit_dungeon(&mut gs.ecs) {
+                    return RunState::GameOver {won: true};
+                }
+                else if try_previous_level(&mut gs.ecs) {
                     return RunState::PreviousLevel;
                 }
             }

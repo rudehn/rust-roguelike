@@ -4,13 +4,18 @@ TBD
 
 # Releasing with WASM for Online Play
 Following instructions from [here](https://bfnightly.bracketproductions.com/rustbook/webbuild.html)
+ or [here](https://johanhelsing.studio/posts/extreme-bevy)
 
 ```
 rustup target add wasm32-unknown-unknown
 cargo install wasm-bindgen-cli
+cargo install wasm-server-runner
+cargo install cargo-watch
 cargo build --release --target wasm32-unknown-unknown
 wasm-bindgen target\wasm32-unknown-unknown\release\rust-roguelike.wasm --out-dir wasm --no-modules --no-typescript
 
+# detect changes in the project directory, and automatically rebuild and relaunch the server
+cargo watch -cx run
 
 ```
 

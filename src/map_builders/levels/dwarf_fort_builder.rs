@@ -5,7 +5,7 @@ use crate::map_builders::{BuilderChain, XStart, YStart, AreaStartingPosition, Ro
 
 pub fn dwarf_fort_builder(new_depth: i32, width: i32, height: i32) -> BuilderChain {
     let mut chain = BuilderChain::new(new_depth, width, height, "Dwarven Fortress");
-    chain.start_with(BspDungeonBuilder::new());
+    chain.start_with(BspDungeonBuilder::dungeon());
     chain.with(RoomSorter::new(RoomSort::CENTRAL));
     chain.with(RoomDrawer::new());
     chain.with(BspCorridors::new());

@@ -1,5 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, Rect, apply_horizontal_tunnel, apply_vertical_tunnel };
-
+use crate::map_builders::{MetaMapBuilder, BuilderMap, apply_horizontal_tunnel, apply_vertical_tunnel };
+use rltk::Rect;
 pub struct DoglegCorridors {}
 
 impl MetaMapBuilder for DoglegCorridors {
@@ -26,16 +26,16 @@ impl DoglegCorridors {
         let mut corridors : Vec<Vec<usize>> = Vec::new();
         for (i,room) in rooms.iter().enumerate() {
             if i > 0 {
-                let (new_x, new_y) = room.center();
-                let (prev_x, prev_y) = rooms[i as usize -1].center();
+                let new_point = room.center();
+                let prev_point = rooms[i as usize -1].center();
                 if crate::rng::range(0,2) == 1 {
-                    let mut c1 = apply_horizontal_tunnel(&mut build_data.map, prev_x, new_x, prev_y);
-                    let mut c2 = apply_vertical_tunnel(&mut build_data.map, prev_y, new_y, new_x);
+                    let mut c1 = apply_horizontal_tunnel(&mut build_data.map, prev_point.x, new_point.x, prev_point.y);
+                    let mut c2 = apply_vertical_tunnel(&mut build_data.map, prev_point.y, new_point.y, new_point.x);
                     c1.append(&mut c2);
                     corridors.push(c1);
                 } else {
-                    let mut c1 = apply_vertical_tunnel(&mut build_data.map, prev_y, new_y, prev_x);
-                    let mut c2 = apply_horizontal_tunnel(&mut build_data.map, prev_x, new_x, new_y);
+                    let mut c1 = apply_vertical_tunnel(&mut build_data.map, prev_point.y, new_point.y, prev_point.x);
+                    let mut c2 = apply_horizontal_tunnel(&mut build_data.map, prev_point.x, new_point.x, new_point.y);
                     c1.append(&mut c2);
                     corridors.push(c1);
                 }

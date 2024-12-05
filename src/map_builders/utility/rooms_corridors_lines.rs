@@ -1,4 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, Rect, TileType };
+use crate::map_builders::{MetaMapBuilder, BuilderMap, TileType };
+use rltk::Rect;
 use std::collections::HashSet;
 
 pub struct StraightLineCorridors {}
@@ -29,11 +30,11 @@ impl StraightLineCorridors {
         for (i,room) in rooms.iter().enumerate() {
             let mut room_distance : Vec<(usize, f32)> = Vec::new();
             let room_center = room.center();
-            let room_center_pt = rltk::Point::new(room_center.0, room_center.1);
+            let room_center_pt = rltk::Point::new(room_center.x, room_center.y);
             for (j,other_room) in rooms.iter().enumerate() {
                 if i != j && !connected.contains(&j) {
                     let other_center = other_room.center();
-                    let other_center_pt = rltk::Point::new(other_center.0, other_center.1);
+                    let other_center_pt = rltk::Point::new(other_center.x, other_center.y);
                     let distance = rltk::DistanceAlg::Pythagoras.distance2d(
                         room_center_pt,
                         other_center_pt
@@ -48,7 +49,7 @@ impl StraightLineCorridors {
                 let line = rltk::line2d(
                     rltk::LineAlg::Bresenham,
                     room_center_pt,
-                    rltk::Point::new(dest_center.0, dest_center.1)
+                    rltk::Point::new(dest_center.x, dest_center.y)
                 );
                 let mut corridor = Vec::new();
                 for cell in line.iter() {

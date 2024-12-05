@@ -1,4 +1,5 @@
-use super::{Map, Rect, TileType, Position, spawner, SHOW_MAPGEN_VISUALIZER};
+use super::{Map, TileType, Position, spawner, SHOW_MAPGEN_VISUALIZER};
+use rltk::{Rect};
 use specs::prelude::*;
 mod simple_map;
 mod algorithms;
@@ -14,7 +15,6 @@ use levels::dwarf_fort_builder::*;
 use utility::distant_exit::DistantExit;
 use simple_map::SimpleMapBuilder;
 use algorithms::bsp_dungeon::BspDungeonBuilder;
-use algorithms::bsp_interior::BspInteriorBuilder;
 use algorithms::cellular_automata::CellularAutomataBuilder;
 use algorithms::drunkard::DrunkardsWalkBuilder;
 use algorithms::maze::MazeBuilder;
@@ -159,11 +159,10 @@ fn random_start_position() -> (XStart, YStart) {
 }
 
 fn random_room_builder(builder : &mut BuilderChain) {
-    let build_roll = crate::rng::roll_dice(1, 3);
+    let build_roll = crate::rng::roll_dice(1, 2);
     match build_roll {
         _ => {println!("SimpleMapBuilder"); builder.start_with(SimpleMapBuilder::new())} ,
         //_ => {println!("BspDungeonBuilder"); builder.start_with(BspDungeonBuilder::new())},
-        // _ => builder.start_with(BspInteriorBuilder::new())
     }
 
     // BSP Interior still makes holes in the walls

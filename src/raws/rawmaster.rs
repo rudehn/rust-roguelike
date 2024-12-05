@@ -427,10 +427,10 @@ macro_rules! apply_effects {
                 "ranged" => $eb = $eb.with(Ranged{ range: effect.1.amount.unwrap() }),
                 "damage" => $eb = $eb.with(InflictsDamage{ damage : effect.1.amount.unwrap() }),
                 "area_of_effect" => $eb = $eb.with(AreaOfEffect{ radius: effect.1.amount.unwrap() }),
-                "confusion" => {
-                    $eb = $eb.with(Confusion{});
-                    $eb = $eb.with(Duration{ turns: effect.1.duration.unwrap() });
-                }
+                "confusion" => $eb = $eb.with(InflictsConfusion{ turns: effect.1.duration.unwrap() }),
+                "burning" => $eb = $eb.with(InflictsBurning{turns: 7}),
+                "tunneling" => $eb = $eb.with(CreatesTunnel{}),
+                "duration" => $eb = $eb.with(Duration{turns: effect.1.amount.unwrap()  }),
                 "magic_mapping" => $eb = $eb.with(MagicMapper{}),
                 "town_portal" => $eb = $eb.with(TownPortal{}),
                 "food" => $eb = $eb.with(ProvidesFood{}),

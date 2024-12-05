@@ -1,4 +1,5 @@
-use super::{InitialMapBuilder, BuilderMap, Rect };
+use super::{InitialMapBuilder, BuilderMap };
+use rltk::{Rect};
 
 pub struct SimpleMapBuilder {}
 
@@ -26,7 +27,7 @@ impl SimpleMapBuilder {
             let h = crate::rng::range(MIN_SIZE, MAX_SIZE);
             let x = crate::rng::roll_dice(1, build_data.map.width - w - 1) - 1;
             let y = crate::rng::roll_dice(1, build_data.map.height - h - 1) - 1;
-            let new_room = Rect::new(x, y, w, h);
+            let new_room = Rect::with_size(x, y, w, h);
             let mut ok = true;
             for other_room in rooms.iter() {
                 if new_room.intersect(other_room) { ok = false }

@@ -1,5 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, Rect, draw_corridor };
-
+use crate::map_builders::{MetaMapBuilder, BuilderMap, draw_corridor };
+use rltk::Rect;
 pub struct BspCorridors {}
 
 impl MetaMapBuilder for BspCorridors {

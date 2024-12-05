@@ -1396,6 +1396,50 @@
         "vendor_category" : "alchemy",
         "magic" : { "class" : "common", "naming" : "Unidentified Rod" }
     },
+    
+    {
+        "name" : "Rod of Tunneling",
+        "renderable": {
+            "glyph" : "/",
+            "fg" : "#FFAAAA",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "consumable" : {
+            "effects" : { 
+                "ranged" : {"amount": 2},
+                "tunneling": {},
+                "particle_line" : {"value": "▓;#FFA500;200.0"}
+            },
+            "charges" : 5
+        },
+        "weight_lbs" : 0.5,
+        "base_value" : 500.0,
+        "vendor_category" : "alchemy",
+        "magic" : { "class" : "common", "naming" : "Unidentified Rod" }
+    },
+    {
+        "name" : "Rod of Fireballs2",
+        "renderable": {
+            "glyph" : "/",
+            "fg" : "#FFAAAA",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "consumable" : {
+            "effects" : { 
+                "ranged" : {"amount": 6},
+                "burning" : {},
+                "area_of_effect" : {"amount": 1},
+                "particle" : {"value": "▓;#FFA500;200.0"}
+            },
+            "charges" : 5
+        },
+        "weight_lbs" : 0.5,
+        "base_value" : 500.0,
+        "vendor_category" : "alchemy",
+        "magic" : { "class" : "common", "naming" : "Unidentified Rod" }
+    },
     {
         "name" : "Amulet of Endulo",
         "renderable": {
@@ -1835,6 +1879,26 @@
         "entry_trigger" : {
             "effects" : {
                 "damage" : {"amount": 6}
+            }
+        }
+    },
+    {
+        "name" : "Fire",
+        "renderable": {
+            "glyph" : "^",
+            "fg" : "#E25822",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "hidden" : false,
+        "light" : {
+            "range" : 6,
+            "color" : "#E25822"
+        },
+        "entry_trigger" : {
+            "effects" : {
+                "burning": {},
+                "duration": {"amount": 4}
             }
         }
     }

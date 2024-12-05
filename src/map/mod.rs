@@ -3,7 +3,7 @@ use specs::prelude::*;
 use serde::{Serialize, Deserialize};
 use std::collections::HashSet;
 mod tiletype;
-pub use tiletype::{TileType, tile_walkable, tile_opaque, tile_cost};
+pub use tiletype::{TileType, tile_burnable, tile_walkable, tile_opaque, tile_cost};
 mod themes;
 pub use themes::*;
 mod dungeon;

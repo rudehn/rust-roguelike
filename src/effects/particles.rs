@@ -1,8 +1,10 @@
 use specs::prelude::*;
 use super::*;
 use crate::systems::particle_system::ParticleBuilder;
-use crate::map::Map;
-use crate::components::{ParticleAnimation, ParticleLifetime, Renderable, Position};
+use crate::raws::{RAWS, spawn_named_entity, SpawnType};
+use crate::map::{Map, tile_burnable};
+use crate::components::{InflictsBurning, Name, ParticleAnimation, ParticleLifetime, Renderable, Position};
+use crate::TileType;
 
 pub fn particle_to_tile(ecs: &mut World, tile_idx : i32, effect: &EffectSpawner) {
     if let EffectType::Particle{ glyph, fg, bg, lifespan } = effect.effect_type {
@@ -40,5 +42,50 @@ pub fn projectile(ecs: &mut World, tile_idx : i32, effect: &EffectSpawner) {
                 })
             })
             .build();
+    }
+}
+
+pub fn create_fire(ecs: &mut World, tile_idx :i32, effect: &EffectSpawner) {
+    if let EffectType::Burning{..} = &effect.effect_type 
+    {
+        // First check that the specified tile isn't already ablaze
+        let mut found_fire = false;
+        
+        let map = ecs.fetch::<Map>();
+        let x = tile_idx % map.width;
+        let y = tile_idx / map.width;
+
+        {
+            let names = ecs.read_storage::<Name>();
+            let burnings = ecs.read_storage::<InflictsBurning>();
+            let positions = ecs.read_storage::<Position>();
+            for (name, _burn, pos) in (&names, &burnings, &positions).join() {
+                println!("looping through fire entities");
+                if name.name == "Fire"  && pos.x == x && pos.y == y {
+                    println!("Found existing fire on this tile");
+                    found_fire = true;
+                    break;
+                }
+            }
+        }
+        if !found_fire {
+            // Now check if this tile is burnable & we can put a fire on it
+            // if tile_burnable(map.tiles[map.xy_idx(x, y)]){
+            if tile_burnable(map.tiles[tile_idx as usize]){
+                std::mem::drop(map);
+                spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Fire", SpawnType::AtPosition { x, y });
+            }
+        }
+    }
+}
+
+pub fn dig_out_tunnel(ecs: &mut World, tile_idx :i32, effect: &EffectSpawner) {
+    if let EffectType::CreatesTunnel = &effect.effect_type 
+    {
+        let mut map = ecs.fetch_mut::<Map>();
+        let idx = tile_idx as usize;
+        if map.tiles[idx] == TileType::Wall {
+            map.tiles[idx] = TileType::Floor;
+        }
     }
 }

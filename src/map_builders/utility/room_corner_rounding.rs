@@ -1,4 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, TileType, Rect};
+use crate::map_builders::{MetaMapBuilder, BuilderMap, TileType};
+use rltk::Rect;
 
 pub struct RoomCornerRounder {}
 

@@ -183,11 +183,16 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
     }
 
     // Confusion
-    if let Some(_confusion) = ecs.read_storage::<Confusion>().get(entity) {
-        if let Some(duration) = ecs.read_storage::<Duration>().get(entity) {
-            add_effect(creator, EffectType::Confusion{ turns : duration.turns }, targets.clone());
-            did_something = true;
-        }
+    if let Some(confusion) = ecs.read_storage::<InflictsConfusion>().get(entity) {
+        add_effect(creator, EffectType::Confusion{ turns : confusion.turns }, targets.clone());
+        did_something = true;
+    }
+
+    // Burning
+    if let Some(burning) = ecs.read_storage::<InflictsBurning>().get(entity) {
+        println!("Adding the burning effect");
+        add_effect(creator, EffectType::Burning{ turns : burning.turns }, targets.clone());
+        did_something = true;
     }
 
     // Teleport
@@ -244,6 +249,11 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
     // Damage Over Time
     if let Some(damage) = ecs.read_storage::<DamageOverTime>().get(entity) {
         add_effect(creator, EffectType::DamageOverTime{ damage : damage.damage }, targets.clone());
+        did_something = true;
+    }
+
+    if let Some(tunneling) = ecs.read_storage::<CreatesTunnel>().get(entity) {
+        add_effect(creator, EffectType::CreatesTunnel{}, targets.clone());
         did_something = true;
     }
 

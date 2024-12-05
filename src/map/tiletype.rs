@@ -18,6 +18,16 @@ pub enum TileType {
     DungeonExit,
 }
 
+pub fn tile_burnable(tt : TileType) -> bool {
+    // Can we place a fire on this tile
+    match tt {
+        TileType::Wall | TileType::Stalactite | TileType::Stalagmite | 
+        TileType::ShallowWater | TileType::DeepWater
+            => false,
+        _ => true
+    }
+}
+
 pub fn tile_walkable(tt : TileType) -> bool {
     match tt {
         TileType::Floor | TileType::DownStairs | TileType::Road | TileType::Grass |

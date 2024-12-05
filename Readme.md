@@ -1,3 +1,35 @@
+# Getting Set Up
+## Installing Rust
+TBD
+
+# Releasing with WASM for Online Play
+Following instructions from [here](https://bfnightly.bracketproductions.com/rustbook/webbuild.html)
+
+```
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli
+cargo build --release --target wasm32-unknown-unknown
+wasm-bindgen target\wasm32-unknown-unknown\release\rust-roguelike.wasm --out-dir wasm --no-modules --no-typescript
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Basic game play:
 * Win condition
   - Go down through the dungeon to retrieve the amulet on level 10 and return up the floors and out the dungeon entrance
@@ -50,12 +82,20 @@ thread 'main' panicked at src\map_builders\utility\starting_points.rs:60:13:
 No valid floors to start on
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rust-roguelike.exe` (exit code: 101)
+Rename stats to STR/CON/DEX/INT
+do entities that died in current turn still get to attack?
+Nameless item bug for fire
+Items with charges don't recharge
+Burning damage particle is on wrong tile when moving
+Should burn items that are on the ground
+Setting fire to fire that already exists will give the fire a "burning" status
+Spells that affect things in a line
+Update tunneling to dig out all paths in the line
 
 
 
-
-
-
+https://www.rockpapershotgun.com/how-do-roguelikes-generate-levels
+https://brogue.fandom.com/wiki/Level_Generation
 
   
 

@@ -1,4 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, Rect };
+use crate::map_builders::{MetaMapBuilder, BuilderMap };
+use rltk::Rect;
 
 #[allow(dead_code)]
 pub enum RoomSort { LEFTMOST, RIGHTMOST, TOPMOST, BOTTOMMOST, CENTRAL }
@@ -30,9 +31,9 @@ impl RoomSorter {
                 let map_center = rltk::Point::new( build_data.map.width / 2, build_data.map.height / 2 );
                 let center_sort = |a : &Rect, b : &Rect| {
                     let a_center = a.center();
-                    let a_center_pt = rltk::Point::new(a_center.0, a_center.1);
+                    let a_center_pt = rltk::Point::new(a_center.x, a_center.y);
                     let b_center = b.center();
-                    let b_center_pt = rltk::Point::new(b_center.0, b_center.1);
+                    let b_center_pt = rltk::Point::new(b_center.x, b_center.y);
                     let distance_a = rltk::DistanceAlg::Pythagoras.distance2d(a_center_pt, map_center);
                     let distance_b = rltk::DistanceAlg::Pythagoras.distance2d(b_center_pt, map_center);
                     distance_a.partial_cmp(&distance_b).unwrap()

@@ -111,7 +111,7 @@ impl CaveTransition {
 
         // Build a BSP-based dungeon
         let mut builder = BuilderChain::new(5, build_data.width, build_data.height, "New Map");
-        builder.start_with(BspDungeonBuilder::new());
+        builder.start_with(BspDungeonBuilder::dungeon());
         builder.with(RoomDrawer::new());
         builder.with(RoomSorter::new(RoomSort::RIGHTMOST));
         builder.with(NearestCorridors::new());

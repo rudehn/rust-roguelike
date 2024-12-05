@@ -1,5 +1,5 @@
-use crate::map_builders::{MetaMapBuilder, BuilderMap, TileType, Rect};
-
+use crate::map_builders::{MetaMapBuilder, BuilderMap, TileType};
+use rltk::Rect;
 pub struct RoomDrawer {}
 
 impl MetaMapBuilder for RoomDrawer {
@@ -30,7 +30,7 @@ impl RoomDrawer {
     fn circle(&mut self, build_data : &mut BuilderMap, room : &Rect) {
         let radius = i32::min(room.x2 - room.x1, room.y2 - room.y1) as f32 / 2.0;
         let center = room.center();
-        let center_pt = rltk::Point::new(center.0, center.1);
+        let center_pt = rltk::Point::new(center.x, center.y);
         for y in room.y1 ..= room.y2 {
             for x in room.x1 ..= room.x2 {
                 let idx = build_data.map.xy_idx(x, y);

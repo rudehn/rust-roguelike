@@ -276,8 +276,22 @@ pub struct AreaOfEffect {
     pub radius : i32
 }
 
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct InflictsConfusion {
+    pub turns: i32
+}
+
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Confusion {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct InflictsBurning {
+    pub turns: i32
+}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct Burning {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Slow {
@@ -313,6 +327,9 @@ pub struct ProvidesMana {
 pub struct TeachesSpell {
     pub spell : String
 }
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct CreatesTunnel {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct BlocksVisibility {}

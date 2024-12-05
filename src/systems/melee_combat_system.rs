@@ -28,12 +28,10 @@ impl<'a> System<'a> for MeleeCombatSystem {
         
         for (entity, wants_melee, name, attacker_attributes, attacker_pools) in (&entities, &wants_melee, &names, &attributes, &pools).join() {
             // Are the attacker and defender alive? Only attack if they are
-            println!("Somebody wants to attack!");
             let target_pools = pools.get(wants_melee.target).unwrap();
             let target_attributes = attributes.get(wants_melee.target).unwrap();
             if attacker_pools.hit_points.current > 0 && target_pools.hit_points.current > 0 {
                 let target_name = names.get(wants_melee.target).unwrap();
-                println!("I'm attacking!");
 
                 // Define the basic unarmed attack - overridden by wielding check below if a weapon is equipped
                 let mut weapon_info = Weapon{
@@ -116,10 +114,10 @@ impl<'a> System<'a> for MeleeCombatSystem {
 
                     let damage = i32::max(0, base_damage + attribute_bonus_stat + 
                         skill_bonus_stat + weapon_damage_bonus);
-                    println!("Damage: {} + {}attr + {}skill + {}weapon = {}",
-                        base_damage, attribute_bonus_stat, skill_bonus_stat,
-                        weapon_damage_bonus, damage
-                    );
+                    // println!("Damage: {} + {}attr + {}skill + {}weapon = {}",
+                        // base_damage, attribute_bonus_stat, skill_bonus_stat,
+                        // weapon_damage_bonus, damage
+                    // );
                     add_effect(
                         Some(entity),
                         EffectType::Damage{ amount: damage },

@@ -1467,6 +1467,28 @@
         "vendor_category" : "alchemy",
         "magic" : { "class" : "common", "naming" : "Unidentified Rod" }
     },
+    {
+        "name" : "Rod of Tunneling",
+        "renderable": {
+            "glyph" : "/",
+            "fg" : "#FFAAAA",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "consumable" : {
+            "effects" : { 
+                "ranged" : {"amount": 2},
+                "tunneling": {},
+                "area_of_effect" : {"amount": 3},
+                "particle" : {"value": "▓;#FFA500;200.0"}
+            },
+            "charges" : 5
+        },
+        "weight_lbs" : 0.5,
+        "base_value" : 500.0,
+        "vendor_category" : "alchemy",
+        "magic" : { "class" : "common", "naming" : "Unidentified Rod" }
+    },
 
     {
         "name" : "Rod of Venom",

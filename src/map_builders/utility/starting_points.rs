@@ -87,7 +87,7 @@ impl RoomBasedStartingPosition {
     fn build(&mut self, build_data : &mut BuilderMap) {
         if let Some(rooms) = &build_data.rooms {
             let start_pos = rooms[0].center();
-            build_data.starting_position = Some(Position{ x: start_pos.0, y: start_pos.1 });
+            build_data.starting_position = Some(Position{ x: start_pos.x, y: start_pos.y });
         } else {
             panic!("Room Based Staring Position only works after rooms have been created");
         }

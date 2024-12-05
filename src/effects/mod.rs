@@ -29,11 +29,13 @@ pub enum EffectType {
     Healing { amount : i32 },
     Mana { amount : i32 },
     Confusion { turns : i32 },
+    Burning { turns: i32 },
     TriggerFire { trigger: Entity },
     TeleportTo { x:i32, y:i32, depth: i32, player_only : bool },
     AttributeEffect { bonus : AttributeBonus, name : String, duration : i32 },
     Slow { initiative_penalty : f32 },
-    DamageOverTime { damage : i32 }
+    DamageOverTime { damage : i32 },
+    CreatesTunnel
 }
 
 #[derive(Clone, Debug)]
@@ -99,6 +101,7 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
         EffectType::Healing{..} => true,
         EffectType::Mana{..} => true,
         EffectType::Confusion{..} => true,
+        EffectType::Burning{..} => true,
         EffectType::TeleportTo{..} => true,
         EffectType::AttributeEffect{..} => true,
         EffectType::Slow{..} => true,
@@ -117,17 +120,21 @@ fn affect_tile(ecs: &mut World, effect: &mut EffectSpawner, tile_idx : i32) {
         EffectType::Bloodstain => damage::bloodstain(ecs, tile_idx),
         EffectType::Particle{..} => particles::particle_to_tile(ecs, tile_idx, &effect),
         EffectType::ParticleProjectile{..} => particles::projectile(ecs, tile_idx, &effect),
+        EffectType::Burning{..} => particles::create_fire(ecs, tile_idx, &effect),
+        EffectType::CreatesTunnel => particles::dig_out_tunnel(ecs, tile_idx, &effect),
         _ => {}
     }
 }
 
 fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
+    // Handle cases where a single effect won't trigger multiple times for an entity
+    // larger than 1 tile.
     if effect.dedupe.contains(&target) { 
         return; 
     }
     effect.dedupe.insert(target);
     match &effect.effect_type {
-        EffectType::Damage{..} => {damage::inflict_damage(ecs, effect, target); println!("inflicting damage now") },
+        EffectType::Damage{..} => damage::inflict_damage(ecs, effect, target),
         EffectType::EntityDeath => damage::death(ecs, effect, target),
         EffectType::Bloodstain{..} => if let Some(pos) = entity_position(ecs, target) { damage::bloodstain(ecs, pos) },
         EffectType::Particle{..} => if let Some(pos) = entity_position(ecs, target) { particles::particle_to_tile(ecs, pos, &effect) },
@@ -135,6 +142,7 @@ fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
         EffectType::Healing{..} => damage::heal_damage(ecs, effect, target),
         EffectType::Mana{..} => damage::restore_mana(ecs, effect, target),
         EffectType::Confusion{..} => damage::add_confusion(ecs, effect, target),
+        EffectType::Burning{..} => damage::add_burning(ecs, effect, target),
         EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, target),
         EffectType::AttributeEffect{..} => damage::attribute_effect(ecs, effect, target),
         EffectType::Slow{..} => damage::slow(ecs, effect, target),

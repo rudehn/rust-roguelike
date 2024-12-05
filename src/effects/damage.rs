@@ -1,6 +1,8 @@
+use std::thread::current;
+
 use specs::prelude::*;
 use super::*;
-use crate::components::{Pools, Player, Attributes, Confusion, SerializeMe, Duration, StatusEffect, 
+use crate::components::{Pools, Player, Attributes, Burning, Confusion, SerializeMe, Duration, StatusEffect, 
     Name, EquipmentChanged, Slow, DamageOverTime, Skills};
 use crate::map::Map;
 use crate::raws::get_challenge_rating_data;
@@ -195,6 +197,40 @@ pub fn add_confusion(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
             .with(Name{ name : "Confusion".to_string() })
             .marked::<SimpleMarker<SerializeMe>>()
             .build();
+    }
+}
+
+
+pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
+    println!("Adding burning to an entity");
+    if let EffectType::Burning{turns} = &effect.effect_type {
+        // If the target is currently burning, just reset the duration counter
+        // TODO - need to check if an existing status effect w/ burning & duration componenets exists
+        let mut found_status = false;
+
+        {
+            let mut durations = ecs.write_storage::<Duration>();
+            let status_effect = ecs.read_storage::<StatusEffect>();
+            let burning = ecs.read_storage::<Burning>();
+            for (effect, _burn, duration) in (&status_effect, &burning, &mut durations).join() {
+                if effect.target == target {
+                    found_status = true;
+                    duration.turns = *turns;
+                    break;
+                }
+            }
+        }
+        if !found_status {
+            {
+                ecs.create_entity()
+                    .with(StatusEffect{ target })
+                    .with(Burning{})
+                    .with(Duration{ turns : *turns})
+                    .with(Name{ name : "Burning".to_string() })
+                    .marked::<SimpleMarker<SerializeMe>>()
+                    .build();
+            }
+        }
     }
 }
 

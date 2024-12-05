@@ -1,6 +1,76 @@
-use crate::map_builders::{InitialMapBuilder, BuilderMap, Rect, TileType};
+use crate::map_builders::{InitialMapBuilder, BuilderMap, TileType};
+use rltk::Rect;
+use petgraph::Graph;
+use std::cmp::{max, min, Ordering};
+use crate::rng::{range, roll_dice};
+
+
+pub struct BspConfig {
+    /// 0..=1; higher values lead to more varied room aspect ratios
+    pub subdivision_variance: f64,
+    pub depth: i32,
+
+    pub min_room_width: i32,
+    pub max_room_width: i32,
+
+    pub min_room_height: i32,
+    pub max_room_height: i32,
+
+    /// Minimum number of wall tiles between the edge of the region and the start of the room.
+    /// Value is *per side*.
+    pub min_padding: i32,
+    /// Maximum number of wall tiles between the edge of the region and the start of the room.
+    /// Value is *per side*.
+    pub max_padding: i32,
+}
+
+impl BspConfig {
+    pub fn dungeon() -> Self {
+        BspConfig {
+            subdivision_variance: 0.2,
+            depth: 6,
+            min_room_width: 6,
+            max_room_width: 10,
+            min_room_height: 6,
+            max_room_height: 10,
+            max_padding: 9000, // Arbitrarily large number. Not maxint because that leads to overflow.
+            min_padding: 2,
+        }
+    }
+
+    pub fn interior() -> Self {
+        BspConfig {
+            subdivision_variance: 0.2,
+            depth: 5,
+            min_room_width: 6,
+            max_room_width: 9000,
+            min_room_height: 6,
+            max_room_height: 9000,
+            max_padding: 0,
+            min_padding: 0,
+        }
+    }
+
+    fn min_region_width(&self) -> i32 {
+        self.min_room_width + self.min_padding * 2
+    }
+
+    fn min_region_height(&self) -> i32 {
+        self.min_room_height + self.min_padding * 2
+    }
+
+    fn subdivision_min(&self) -> f64 {
+        0.5 - self.subdivision_variance / 2.0
+    }
+
+    fn subdivision_max(&self) -> f64 {
+        0.5 + self.subdivision_variance / 2.0
+    }
+}
+
 
 pub struct BspDungeonBuilder {
+    config: BspConfig,
     rects: Vec<Rect>,
 }
 
@@ -13,100 +83,187 @@ impl InitialMapBuilder for BspDungeonBuilder {
 
 impl BspDungeonBuilder {
     #[allow(dead_code)]
-    pub fn new() -> Box<BspDungeonBuilder> {
+    pub fn new(config: BspConfig) -> Box<BspDungeonBuilder> {
         Box::new(BspDungeonBuilder{
+            config,
             rects: Vec::new(),
         })
     }
 
+    pub fn dungeon() -> Box<BspDungeonBuilder> {
+        Box::new(BspDungeonBuilder{
+            config: BspConfig {
+                subdivision_variance: 0.2,
+                depth: 6,
+                min_room_width: 6,
+                max_room_width: 10,
+                min_room_height: 6,
+                max_room_height: 10,
+                max_padding: 9000, // Arbitrarily large number. Not maxint because that leads to overflow.
+                min_padding: 2,
+            },
+            rects: Vec::new(),
+        })
+    }
+
+    pub fn interior() -> Box<BspDungeonBuilder> {
+        Box::new(BspDungeonBuilder{
+            config: BspConfig {
+                subdivision_variance: 0.2,
+                depth: 5,
+                min_room_width: 6,
+                max_room_width: 9000,
+                min_room_height: 6,
+                max_room_height: 9000,
+                max_padding: 0, // this is what gives us the "interior" look
+                min_padding: 0,
+            },
+            rects: Vec::new(),
+            })
+    }
+
     fn build(&mut self, build_data : &mut BuilderMap) {
-        let mut rooms : Vec<Rect> = Vec::new();
-        self.rects.clear();
-        self.rects.push( Rect::new(2, 2, build_data.map.width-5, build_data.map.height-5) ); // Start with a single map-sized rectangle
-        let first_room = self.rects[0];
-        self.add_subrects(first_room); // Divide the first room
+        let mut graph = Graph::<Rect, ()>::new();
+        let root = graph.add_node(Rect::with_size(
+            0,
+            0,
+            build_data.map.width - 1,
+            build_data.map.height - 1,
+        ));
+        let mut leaves = vec![root];
+        let mut rooms = Vec::new();
 
-        // Up to 240 times, we get a random rectangle and divide it. If its possible to squeeze a
-        // room in there, we place it and add it to the rooms list.
-        let mut n_rooms = 0;
-        while n_rooms < 240 {
-            let rect = self.get_random_rect();
-            let candidate = self.get_random_sub_rect(rect);
+        // Generate space partition
+        let mut rng = rltk::RandomNumberGenerator::new();
+        let mut max_depth = 0;
+        for depth in 1..self.config.depth + 1 {
+            leaves = leaves
+                .iter()
+                .flat_map(|&leaf| {
+                    let leaf_rect = graph.node_weight(leaf).unwrap();
+                    let mut a_rect;
+                    let mut b_rect;
 
-            if self.is_possible(candidate, &build_data, &rooms) {
-                //apply_room_to_map(&mut build_data.map, &candidate);
-                rooms.push(candidate);
-                self.add_subrects(rect);
-            }
+                    a_rect = *leaf_rect;
+                    b_rect = *leaf_rect;
+                    let position =
+                        rng.range(self.config.subdivision_min(), self.config.subdivision_max());
+                    if roll_dice(1, 2) == 1 {
+                        a_rect.x2 -= (a_rect.width() as f64 * position).round() as i32;
+                        b_rect.x1 = a_rect.x2;
+                    } else {
+                        a_rect.y2 -= (a_rect.height() as f64 * position).round() as i32;
+                        b_rect.y1 = a_rect.y2;
+                    }
 
-            n_rooms += 1;
+                    if a_rect.width() < self.config.min_region_width()
+                        || b_rect.width() < self.config.min_region_width()
+                        || a_rect.height() < self.config.min_region_height()
+                        || b_rect.height() < self.config.min_region_height()
+                    {
+                        vec![leaf]
+                    } else {
+                        let a = graph.add_node(a_rect);
+                        let b = graph.add_node(b_rect);
+                        graph.add_edge(leaf, a, ());
+                        graph.add_edge(leaf, b, ());
+                        max_depth = max(max_depth, depth);
+                        vec![a, b]
+                    }
+                })
+                .collect();
+
+            build_data.take_snapshot();
         }
+
+        // Create room in each partition
+        for leaf in leaves {
+            let partition = graph.node_weight(leaf).unwrap();
+
+            // Generate random room width based on config
+            let min_width = max(
+                self.config.min_room_width,
+                partition.width() - self.config.max_padding * 2,
+            );
+            let max_width = min(
+                partition.width() - self.config.min_padding * 2,
+                self.config.max_room_width,
+            );
+            let width = match min_width.cmp(&max_width) {
+                Ordering::Equal => min_width,
+                Ordering::Less => range(min_width, max_width),
+                _ => unreachable!(),
+            };
+
+            // Generate random room left-edge, based on config and width
+            let min_x1 = partition.x1 + self.config.min_padding;
+            let max_x1 = partition.x2 - width - self.config.min_padding;
+            let x1 = match min_x1.cmp(&max_x1) {
+                Ordering::Equal => min_x1,
+                Ordering::Less => range(min_x1, max_x1),
+                _ => unreachable!(),
+            };
+
+            // Generate random room height based on config
+            let min_height = max(
+                self.config.min_room_height,
+                partition.height() - self.config.max_padding * 2,
+            );
+            let max_height = min(
+                partition.height() - self.config.min_padding * 2,
+                self.config.max_room_width,
+            );
+            let height = match min_height.cmp(&max_height) {
+                Ordering::Equal => min_height,
+                Ordering::Less => range(min_height, max_height),
+                _ => unreachable!(),
+            };
+
+            // Generate random room top-edge, based on config and height
+            let min_y1 = partition.y1 + self.config.min_padding;
+            let may_y1 = partition.y2 - height - self.config.min_padding;
+            let y1 = match min_y1.cmp(&may_y1) {
+                Ordering::Equal => min_y1,
+                Ordering::Less => range(min_y1, may_y1),
+                _ => unreachable!(),
+            };
+
+            let room = Rect::with_size(x1, y1, width, height);
+            rooms.push(room);
+        }
+        build_data.take_snapshot();
+
+        // Add corridors
+        // for depth in (0..max_depth).rev() {
+        //     let mut parents = vec![root];
+
+        //     // Find nodes at `depth`
+        //     for _ in 0..depth {
+        //         parents = parents
+        //             .iter()
+        //             .flat_map(|&index| graph.neighbors(index))
+        //             .collect();
+        //     }
+
+        //     // Connect the children of each node at `depth`
+        //     for parent in parents {
+        //         let children = graph.neighbors(parent).collect::<Vec<_>>();
+        //         if children.len() < 2 {
+        //             continue;
+        //         }
+        //         for i in 0..children.len() - 1 {
+        //             connect_regions(
+        //                 *graph.node_weight(children[i]).unwrap(),
+        //                 *graph.node_weight(children[i + 1]).unwrap(),
+        //                 &mut build_data.map,
+        //                 rng,
+        //             );
+        //             build_data.take_snapshot();
+        //         }
+        //     }
+        // }
 
         build_data.rooms = Some(rooms);
     }
 
-    fn add_subrects(&mut self, rect : Rect) {
-        let width = i32::abs(rect.x1 - rect.x2);
-        let height = i32::abs(rect.y1 - rect.y2);
-        let half_width = i32::max(width / 2, 1);
-        let half_height = i32::max(height / 2, 1);
-
-        self.rects.push(Rect::new( rect.x1, rect.y1, half_width, half_height ));
-        self.rects.push(Rect::new( rect.x1, rect.y1 + half_height, half_width, half_height ));
-        self.rects.push(Rect::new( rect.x1 + half_width, rect.y1, half_width, half_height ));
-        self.rects.push(Rect::new( rect.x1 + half_width, rect.y1 + half_height, half_width, half_height ));
-    }
-
-    fn get_random_rect(&mut self) -> Rect {
-        if self.rects.len() == 1 { return self.rects[0]; }
-        let idx = (crate::rng::roll_dice(1, self.rects.len() as i32)-1) as usize;
-        self.rects[idx]
-    }
-
-    fn get_random_sub_rect(&self, rect : Rect) -> Rect {
-        let mut result = rect;
-        let rect_width = i32::abs(rect.x1 - rect.x2);
-        let rect_height = i32::abs(rect.y1 - rect.y2);
-
-        let w = i32::max(3, crate::rng::roll_dice(1, i32::min(rect_width, 20))-1) + 1;
-        let h = i32::max(3, crate::rng::roll_dice(1, i32::min(rect_height, 20))-1) + 1;
-
-        result.x1 += crate::rng::roll_dice(1, 6)-1;
-        result.y1 += crate::rng::roll_dice(1, 6)-1;
-        result.x2 = result.x1 + w;
-        result.y2 = result.y1 + h;
-
-        result
-    }
-
-    fn is_possible(&self, rect : Rect, build_data : &BuilderMap, rooms: &[Rect]) -> bool {
-        let mut expanded = rect;
-        expanded.x1 -= 2;
-        expanded.x2 += 2;
-        expanded.y1 -= 2;
-        expanded.y2 += 2;
-
-        let mut can_build = true;
-
-        for r in rooms.iter() {
-            if r.intersect(&rect) { can_build = false; }
-        }
-
-        for y in expanded.y1 ..= expanded.y2 {
-            for x in expanded.x1 ..= expanded.x2 {
-                if x > build_data.map.width-2 { can_build = false; }
-                if y > build_data.map.height-2 { can_build = false; }
-                if x < 1 { can_build = false; }
-                if y < 1 { can_build = false; }
-                if can_build {
-                    let idx = build_data.map.xy_idx(x, y);
-                    if build_data.map.tiles[idx] != TileType::Wall {
-                        can_build = false;
-                    }
-                }
-            }
-        }
-
-        can_build
-    }
 }

@@ -26,3 +26,5 @@
 * How does the vision range feel? Does it need updated?
 * Each type of weapon should have a unique stat or effect. Such as a spear hitting 2 tiles in front of character, while an axe does AOE in a circle around character, etc. Giving a unique feel for each type of weapon makes for more interesting gameplay options, rather than just swapping out for a weapon with better stats
     * Possible effects - club=knockback, spear=pierce, sword=more damage, axe=AOE around user
+* Add additional types of ground tiles, such as grass & long grass. Long grass would obscure vision
+* Update fire system to let fire spread if any burnable tiles, such as grass, are adjacent to a current fire tile

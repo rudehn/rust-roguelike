@@ -23,6 +23,6 @@ python3 -m http.server
 ```
 
 # Additional Documentation
-* [design-ideas][./docs/design-ideas.md]
-* [known-bugs][./docs/known-bugs.md]
-* [feature-requests][./docs/feature-requests.md]
+* [design-ideas][/docs/design-ideas.md]
+* [known-bugs][/docs/known-bugs.md]
+* [feature-requests][/docs/feature-requests.md]

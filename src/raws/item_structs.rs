@@ -60,9 +60,9 @@ pub struct MagicItem {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ItemAttributeBonus {
-    pub might : Option<i32>,
-    pub fitness : Option<i32>,
-    pub quickness : Option<i32>,
+    pub strength : Option<i32>,
+    pub constitution : Option<i32>,
+    pub dexterity : Option<i32>,
     pub intelligence : Option<i32>
 }
 

@@ -30,16 +30,16 @@ impl<'a> System<'a> for EncumbranceSystem {
         struct ItemUpdate {
             weight : f32,
             initiative : f32,
-            might : i32,
-            fitness : i32,
-            quickness : i32,
+            strength : i32,
+            constitution : i32,
+            dexterity : i32,
             intelligence : i32
         }
 
         // Build the map of who needs updating
         let mut to_update : HashMap<Entity, ItemUpdate> = HashMap::new(); // (weight, intiative)
         for (entity, _dirty) in (&entities, &equip_dirty).join() {
-            to_update.insert(entity, ItemUpdate{ weight: 0.0, initiative: 0.0, might: 0, fitness: 0, quickness: 0, intelligence: 0 });
+            to_update.insert(entity, ItemUpdate{ weight: 0.0, initiative: 0.0, strength: 0, constitution: 0, dexterity: 0, intelligence: 0 });
         }
 
         // Remove all dirty statements
@@ -53,9 +53,9 @@ impl<'a> System<'a> for EncumbranceSystem {
                 totals.weight += item.weight_lbs;
                 totals.initiative += item.initiative_penalty;
                 if let Some(attr) = attrbonus.get(entity) {
-                    totals.might += attr.might.unwrap_or(0);
-                    totals.fitness += attr.fitness.unwrap_or(0);
-                    totals.quickness += attr.quickness.unwrap_or(0);
+                    totals.strength += attr.strength.unwrap_or(0);
+                    totals.constitution += attr.constitution.unwrap_or(0);
+                    totals.dexterity += attr.dexterity.unwrap_or(0);
                     totals.intelligence += attr.intelligence.unwrap_or(0);
                 }
             }
@@ -74,9 +74,9 @@ impl<'a> System<'a> for EncumbranceSystem {
         for (status, attr) in (&statuses, &attrbonus).join() {
             if to_update.contains_key(&status.target) {
                 let totals = to_update.get_mut(&status.target).unwrap();
-                totals.might += attr.might.unwrap_or(0);
-                totals.fitness += attr.fitness.unwrap_or(0);
-                totals.quickness += attr.quickness.unwrap_or(0);
+                totals.strength += attr.strength.unwrap_or(0);
+                totals.constitution += attr.constitution.unwrap_or(0);
+                totals.dexterity += attr.dexterity.unwrap_or(0);
                 totals.intelligence += attr.intelligence.unwrap_or(0);
             }
         }
@@ -96,16 +96,16 @@ impl<'a> System<'a> for EncumbranceSystem {
                 pool.total_initiative_penalty = item.initiative;
 
                 if let Some(attr) = attributes.get_mut(*entity) {
-                    attr.might.modifiers = item.might;
-                    attr.fitness.modifiers = item.fitness;
-                    attr.quickness.modifiers = item.quickness;
+                    attr.strength.modifiers = item.strength;
+                    attr.constitution.modifiers = item.constitution;
+                    attr.dexterity.modifiers = item.dexterity;
                     attr.intelligence.modifiers = item.intelligence;
-                    attr.might.bonus = attr_bonus(attr.might.base + attr.might.modifiers);
-                    attr.fitness.bonus = attr_bonus(attr.fitness.base + attr.fitness.modifiers);
-                    attr.quickness.bonus = attr_bonus(attr.quickness.base + attr.quickness.modifiers);
+                    attr.strength.bonus = attr_bonus(attr.strength.base + attr.strength.modifiers);
+                    attr.constitution.bonus = attr_bonus(attr.constitution.base + attr.constitution.modifiers);
+                    attr.dexterity.bonus = attr_bonus(attr.dexterity.base + attr.dexterity.modifiers);
                     attr.intelligence.bonus = attr_bonus(attr.intelligence.base + attr.intelligence.modifiers);
 
-                    let carry_capacity_lbs = (attr.might.base + attr.might.modifiers) * 15;
+                    let carry_capacity_lbs = (attr.strength.base + attr.strength.modifiers) * 15;
                     if pool.total_weight as i32 > carry_capacity_lbs {
                         // Overburdened
                         pool.total_initiative_penalty += 4.0;

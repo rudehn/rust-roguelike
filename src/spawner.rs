@@ -32,9 +32,9 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
         .with(Name{name: "Player".to_string() })
         .with(HungerClock{ state: HungerState::WellFed, duration: 20 })
         .with(Attributes{
-            might: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            fitness: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            quickness: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
+            strength: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
+            constitution: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
+            dexterity: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
             intelligence: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
         })
         .with(skills)
@@ -70,8 +70,8 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Torn Trousers", SpawnType::Equipped{by : player});
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Old Boots", SpawnType::Equipped{by : player});
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Shortbow", SpawnType::Carried{by : player});
-    //spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Tunneling", SpawnType::Carried{by : player});
+    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
+    // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Tunneling", SpawnType::Carried{by : player});
 
     // Starting hangover
     // ecs.create_entity()
@@ -79,9 +79,9 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
     //     .with(Duration{ turns:10 })
     //     .with(Name{ name: "Hangover".to_string() })
     //     .with(AttributeBonus{
-    //         might : Some(-1),
-    //         fitness : None,
-    //         quickness : Some(-1),
+    //         strength : Some(-1),
+    //         constitution : None,
+    //         dexterity : Some(-1),
     //         intelligence : Some(-1)
     //     })
     //     .marked::<SimpleMarker<SerializeMe>>()

@@ -542,9 +542,9 @@ pub fn spawn_named_item(raws: &RawMaster, ecs : &mut World, key : &str, pos : Sp
 
         if let Some(ab) = &item_template.attributes {
             eb = eb.with(AttributeBonus{
-                might : ab.might,
-                fitness : ab.fitness,
-                quickness : ab.quickness,
+                strength : ab.strength,
+                constitution : ab.constitution,
+                dexterity : ab.dexterity,
                 intelligence : ab.intelligence,
             });
         }
@@ -593,23 +593,23 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
             eb = eb.with(BlocksTile{});
         }
 
-        let mut mob_fitness = 10;
+        let mut mob_constitution = 10;
         let mut mob_int = 10;
         let mut attr = Attributes{
-            might: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
-            fitness: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
-            quickness: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            strength: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            constitution: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            dexterity: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
             intelligence: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
         };
-        if let Some(might) = mob_template.attributes.might {
-            attr.might = Attribute{ base: might, modifiers: 0, bonus: attr_bonus(might) };
+        if let Some(strength) = mob_template.attributes.strength {
+            attr.strength = Attribute{ base: strength, modifiers: 0, bonus: attr_bonus(strength) };
         }
-        if let Some(fitness) = mob_template.attributes.fitness {
-            attr.fitness = Attribute{ base: fitness, modifiers: 0, bonus: attr_bonus(fitness) };
-            mob_fitness = fitness;
+        if let Some(constitution) = mob_template.attributes.constitution {
+            attr.constitution = Attribute{ base: constitution, modifiers: 0, bonus: attr_bonus(constitution) };
+            mob_constitution = constitution;
         }
-        if let Some(quickness) = mob_template.attributes.quickness {
-            attr.quickness = Attribute{ base: quickness, modifiers: 0, bonus: attr_bonus(quickness) };
+        if let Some(dexterity) = mob_template.attributes.dexterity {
+            attr.dexterity = Attribute{ base: dexterity, modifiers: 0, bonus: attr_bonus(dexterity) };
         }
         if let Some(intelligence) = mob_template.attributes.intelligence {
             attr.intelligence = Attribute{ base: intelligence, modifiers: 0, bonus: attr_bonus(intelligence) };

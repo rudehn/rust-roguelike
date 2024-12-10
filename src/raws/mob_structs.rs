@@ -29,9 +29,9 @@ pub struct Mob {
 
 #[derive(Deserialize, Debug)]
 pub struct MobAttributes {
-    pub might : Option<i32>,
-    pub fitness : Option<i32>,
-    pub quickness : Option<i32>,
+    pub strength : Option<i32>,
+    pub constitution : Option<i32>,
+    pub dexterity : Option<i32>,
     pub intelligence : Option<i32>
 }
 

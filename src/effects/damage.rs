@@ -90,15 +90,15 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                     let attr_to_boost = crate::rng::roll_dice(1, 4);
                     match attr_to_boost {
                         1 => {
-                            player_attributes.might.base += 1;
+                            player_attributes.strength.base += 1;
                             crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel stronger!").log();
                         }
                         2 => {
-                            player_attributes.fitness.base += 1;
+                            player_attributes.constitution.base += 1;
                             crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel healthier!").log();
                         }
                         3 => {
-                            player_attributes.quickness.base += 1;
+                            player_attributes.dexterity.base += 1;
                             crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel quicker!").log();
                         }
                         _ => {
@@ -121,7 +121,7 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                         .expect("Insert Failed");
 
                     player_stats.hit_points.max = player_hp_at_level(
-                        player_attributes.fitness.base + player_attributes.fitness.modifiers,
+                        player_attributes.constitution.base + player_attributes.constitution.modifiers,
                         player_stats.level
                     );
                     player_stats.hit_points.current = player_stats.hit_points.max;

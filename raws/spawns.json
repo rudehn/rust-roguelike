@@ -204,7 +204,7 @@
         "base_value" : 50.0,
         "vendor_category" : "alchemy",
         "magic" : { "class" : "common", "naming" : "potion" },
-        "attributes" : { "might" : 5 }
+        "attributes" : { "strength" : 5 }
     },
 
     {
@@ -1371,7 +1371,7 @@
         "initiative_penalty" : 0.0,
         "vendor_category" : "armor",
         "magic" : { "class" : "common", "naming" : "Unidentified Gauntlets" },
-        "attributes" : { "might" : 5 }
+        "attributes" : { "strength" : 5 }
     },
 
     {
@@ -1512,10 +1512,16 @@
         "challenge_rating": -2,
         "health": "2d6",
         "attributes" : {
-            "might" : 8,
-            "quickness" : 14,
-            "fitness": 10,
+            "strength" : 8,
+            "dexterity" : 14,
+            "constitution": 10,
             "intelligence": 10
+        },
+        "natural" : {
+            "attacks" : [
+                { "name" : "bite", "hit_bonus" : 1, "damage" : "1d4+1" },
+                { "name" : "claw", "hit_bonus" : 1, "damage" : "1d4+1" }
+            ]
         },
         "equipped" : [ "Dagger", "Shield", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
         "faction" : "Enemies"
@@ -1534,9 +1540,9 @@
         "challenge_rating": -3,
         "health": "2d8+6",
         "attributes" : {
-            "might" : 16,
-            "quickness" : 12,
-            "fitness": 16,
+            "strength" : 16,
+            "dexterity" : 12,
+            "constitution": 16,
             "intelligence": 7
         },
         "equipped" : [ "Greataxe", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
@@ -1556,9 +1562,9 @@
         "challenge_rating": 1,
         "health": "4d10+4",
         "attributes" : {
-            "might" : 12,
-            "quickness" : 16,
-            "fitness": 12,
+            "strength" : 12,
+            "dexterity" : 16,
+            "constitution": 12,
             "intelligence": 2
         },
         "natural" : {
@@ -1586,9 +1592,9 @@
         "challenge_rating": 2,
         "health": "7d10+21",
         "attributes" : {
-            "might" : 19,
-            "quickness" : 8,
-            "fitness": 16,
+            "strength" : 19,
+            "dexterity" : 8,
+            "constitution": 16,
             "intelligence": 5
         },
         "equipped" : [ "Greatclub", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
@@ -1608,9 +1614,9 @@
         "challenge_rating": 5,
         "health": "8d10+40",
         "attributes" : {
-            "might" : 18,
-            "quickness" : 13,
-            "fitness": 20,
+            "strength" : 18,
+            "dexterity" : 13,
+            "constitution": 20,
             "intelligence": 7
         },
         "natural" : {

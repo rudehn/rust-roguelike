@@ -11,3 +11,4 @@
 * damage over time not giving XP - https://github.com/amethyst/rustrogueliketutorial/issues/164
 * A* pathfinding is incredibly slow
 * Targeting with the bow can sometimes cause an exception
+* Casting damage through a staff doesn't log damage

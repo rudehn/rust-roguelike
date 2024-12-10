@@ -40,9 +40,9 @@ impl<'a> System<'a> for InitiativeSystem {
                 // Re-roll
                 initiative.current = 6 + crate::rng::roll_dice(1, 6);
 
-                // Give a bonus for quickness
+                // Give a bonus for dexterity
                 if let Some(attr) = attributes.get(entity) {
-                    initiative.current -= attr.quickness.bonus;
+                    initiative.current -= attr.dexterity.bonus;
                 }
 
                 // Apply pool penalty

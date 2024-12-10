@@ -266,7 +266,7 @@
         "base_value" : 50.0,
         "vendor_category" : "alchemy",
         "magic" : { "class" : "common", "naming" : "potion" },
-        "attributes" : { "might" : 5 }
+        "attributes" : { "strength" : 5 }
     },
 
     {
@@ -533,7 +533,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d8-1",
             "hit_bonus" : -1
         },
@@ -553,7 +553,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "Quickness",
+            "attribute" : "Dexterity",
             "base_damage" : "1d4",
             "hit_bonus" : 0
         },
@@ -579,7 +579,7 @@
         },
         "weapon" : {
             "range" : "4",
-            "attribute" : "Quickness",
+            "attribute" : "Dexterity",
             "base_damage" : "1d4",
             "hit_bonus" : 0
         },
@@ -605,7 +605,7 @@
         },
         "weapon" : {
             "range" : "6",
-            "attribute" : "Quickness",
+            "attribute" : "Dexterity",
             "base_damage" : "1d6",
             "hit_bonus" : 0
         },
@@ -631,7 +631,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d6",
             "hit_bonus" : 0
         },
@@ -657,7 +657,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d8",
             "hit_bonus" : 0
         },
@@ -683,7 +683,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d6+2",
             "hit_bonus" : 1
         },
@@ -709,7 +709,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d8",
             "hit_bonus" : 0
         },
@@ -735,7 +735,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "might",
+            "attribute" : "strength",
             "base_damage" : "1d12",
             "hit_bonus" : 0
         },
@@ -863,7 +863,7 @@
         },
         "weapon" : {
             "range" : "melee",
-            "attribute" : "Quickness",
+            "attribute" : "Dexterity",
             "base_damage" : "1d4",
             "hit_bonus" : 0
         },
@@ -1442,7 +1442,7 @@
         "initiative_penalty" : 0.0,
         "vendor_category" : "armor",
         "magic" : { "class" : "common", "naming" : "Unidentified Gauntlets" },
-        "attributes" : { "might" : 5 }
+        "attributes" : { "strength" : 5 }
     },
 
     {
@@ -1782,8 +1782,8 @@
         "vision_range" : 8,
         "movement" : "static",
         "attributes" : {
-            "might" : 7,
-            "fitness" : 3
+            "strength" : 7,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : -1,
@@ -1810,8 +1810,8 @@
         "vision_range" : 8,
         "movement" : "static",
         "attributes" : {
-            "might" : 3,
-            "fitness" : 3
+            "strength" : 3,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : -1,
@@ -1839,8 +1839,8 @@
         "vision_range" : 8,
         "movement" : "static",
         "attributes" : {
-            "might" : 3,
-            "fitness" : 3
+            "strength" : 3,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : -1,
@@ -1868,8 +1868,8 @@
         "vision_range" : 8,
         "movement" : "random",
         "attributes" : {
-            "might" : 3,
-            "fitness" : 3
+            "strength" : 3,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : -1,
@@ -2193,8 +2193,8 @@
         "vision_range" : 6,
         "movement" : "random",
         "attributes" : {
-            "might" : 3,
-            "fitness" : 3
+            "strength" : 3,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : -1,
@@ -2271,8 +2271,8 @@
         "vision_range" : 12,
         "movement" : "random_waypoint",
         "attributes" : {
-            "might" : 3,
-            "fitness" : 3
+            "strength" : 3,
+            "constitution" : 3
         },
         "skills" : {
             "Melee" : 15,
@@ -2304,8 +2304,8 @@
         "vision_range" : 12,
         "movement" : "static",
         "attributes" : {
-            "might" : 13,
-            "fitness" : 13
+            "strength" : 13,
+            "constitution" : 13
         },
         "skills" : {
             "Melee" : 18,
@@ -2514,8 +2514,8 @@
         "vision_range" : 6,
         "movement" : "static",
         "attributes" : {
-            "might" : 13,
-            "fitness" : 13
+            "strength" : 13,
+            "constitution" : 13
         },
         "skills" : {
             "Melee" : 18,

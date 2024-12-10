@@ -89,9 +89,9 @@ fn draw_stats(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
 fn draw_attributes(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
     let attributes = ecs.read_storage::<Attributes>();
     let attr = attributes.get(*player_entity).unwrap();
-    draw_attribute("Might:", &attr.might, 4, draw_batch);
-    draw_attribute("Quickness:", &attr.quickness, 5, draw_batch);
-    draw_attribute("Fitness:", &attr.fitness, 6, draw_batch);
+    draw_attribute("Strength:", &attr.strength, 4, draw_batch);
+    draw_attribute("Dexterity:", &attr.dexterity, 5, draw_batch);
+    draw_attribute("Constitution:", &attr.constitution, 6, draw_batch);
     draw_attribute("Intelligence:", &attr.intelligence, 7, draw_batch);
 }
 
@@ -106,7 +106,7 @@ fn initiative_weight(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &En
         Point::new(50, 9),
         &format!("{:.0} lbs ({} lbs max)",
             player_pools.total_weight,
-            (attr.might.base + attr.might.modifiers) * 15
+            (attr.strength.base + attr.strength.modifiers) * 15
         ),
         ColorPair::new(white, black)
     );

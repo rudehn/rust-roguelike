@@ -50,6 +50,7 @@ TileSet - https://en.wikipedia.org/wiki/Code_page_437
 
 
 Mobs
+- https://www.reddit.com/r/roguelikedev/comments/viicvz/share_some_enemyability_gimmicks/
 - Each mob should have a unique theme, possible themes include
   - basic melee
   - basic ranged, single target

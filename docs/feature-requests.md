@@ -28,3 +28,6 @@
     * Possible effects - club=knockback, spear=pierce, sword=more damage, axe=AOE around user
 * Add additional types of ground tiles, such as grass & long grass. Long grass would obscure vision
 * Update fire system to let fire spread if any burnable tiles, such as grass, are adjacent to a current fire tile
+* Rework status effect duration updates to move them out of the initiative system
+  * Add a global turn counter that rotates every 10 frames, make a system read for the counter & run any pre/post turn processing?
+* When we remove turns, add in a "TurnComplete" component with the turn action cost. Then have a system iterate those turn complete components, update the linked entities initiative, and run any status effects on the entity

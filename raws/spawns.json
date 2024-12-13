@@ -1517,13 +1517,7 @@
             "constitution": 10,
             "intelligence": 10
         },
-        "natural" : {
-            "attacks" : [
-                { "name" : "bite", "hit_bonus" : 1, "damage" : "1d4+1" },
-                { "name" : "claw", "hit_bonus" : 1, "damage" : "1d4+1" }
-            ]
-        },
-        "equipped" : [ "Dagger", "Shield", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
+        "equipped" : ["Dagger"],
         "faction" : "Enemies"
     },
     {

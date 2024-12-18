@@ -22,33 +22,6 @@
     }
 ],
 
-"challenge_ratings": [
-    { "challenge_rating": 0, "xp_gain": 0, "proficiency_bonus": 2 },
-    { "challenge_rating": -1, "xp_gain": 25, "proficiency_bonus": 2 },
-    { "challenge_rating": -2, "xp_gain": 50, "proficiency_bonus": 2 },
-    { "challenge_rating": -3, "xp_gain": 100, "proficiency_bonus": 2 },
-    { "challenge_rating": 1, "xp_gain": 200, "proficiency_bonus": 2 },
-    { "challenge_rating": 2, "xp_gain": 450, "proficiency_bonus": 2 },
-    { "challenge_rating": 3, "xp_gain": 700, "proficiency_bonus": 2 },
-    { "challenge_rating": 4, "xp_gain": 1100, "proficiency_bonus": 2 },
-    { "challenge_rating": 5, "xp_gain": 1800, "proficiency_bonus": 3 },
-    { "challenge_rating": 6, "xp_gain": 2300, "proficiency_bonus": 3 },
-    { "challenge_rating": 7, "xp_gain": 2900, "proficiency_bonus": 3 },
-    { "challenge_rating": 8, "xp_gain": 3900, "proficiency_bonus": 3 },
-    { "challenge_rating": 9, "xp_gain": 5000, "proficiency_bonus": 4 },
-    { "challenge_rating": 10, "xp_gain": 5900, "proficiency_bonus": 4 },
-    { "challenge_rating": 11, "xp_gain": 7200, "proficiency_bonus": 4 },
-    { "challenge_rating": 12, "xp_gain": 8400, "proficiency_bonus": 4 },
-    { "challenge_rating": 13, "xp_gain": 10000, "proficiency_bonus": 5 },
-    { "challenge_rating": 14, "xp_gain": 11500, "proficiency_bonus": 5 },
-    { "challenge_rating": 15, "xp_gain": 13000, "proficiency_bonus": 5 },
-    { "challenge_rating": 16, "xp_gain": 15000, "proficiency_bonus": 5 },
-    { "challenge_rating": 17, "xp_gain": 18000, "proficiency_bonus": 6 },
-    { "challenge_rating": 18, "xp_gain": 20000, "proficiency_bonus": 6 },
-    { "challenge_rating": 19, "xp_gain": 22000, "proficiency_bonus": 6 },
-    { "challenge_rating": 20, "xp_gain": 25000, "proficiency_bonus": 6 }
-],
-
 "faction_table" : [
     { "name" : "Player", "responses": { }},
      { "name" : "Enemies", "responses" : { "Default" : "attack", "Enemies" : "ignore" } },
@@ -187,24 +160,6 @@
         "base_value" : 50.0,
         "vendor_category" : "alchemy",
         "magic" : { "class" : "common", "naming" : "potion" }
-    },
-
-    {
-        "name" : "Strength Potion",
-        "renderable": {
-            "glyph" : "!",
-            "fg" : "#FF00FF",
-            "bg" : "#000000",
-            "order" : 2
-        },
-        "consumable" : {
-            "effects" : { "particle" : {"value": "!;#FF0000;200.0"}  }
-        },
-        "weight_lbs" : 0.5,
-        "base_value" : 50.0,
-        "vendor_category" : "alchemy",
-        "magic" : { "class" : "common", "naming" : "potion" },
-        "attributes" : { "strength" : 5 }
     },
 
     {
@@ -1353,27 +1308,6 @@
             "include_cursed" : true
         }
     },
-
-    {
-        "name" : "Gauntlets of Ogre Power",
-        "renderable": {
-            "glyph" : "[",
-            "fg" : "#00FF00",
-            "bg" : "#000000",
-            "order" : 2
-        },
-        "wearable" : {
-            "slot" : "Hands",
-            "armor_class" : 0.1
-        },
-        "weight_lbs" : 1.0,
-        "base_value" : 300.0,
-        "initiative_penalty" : 0.0,
-        "vendor_category" : "armor",
-        "magic" : { "class" : "common", "naming" : "Unidentified Gauntlets" },
-        "attributes" : { "strength" : 5 }
-    },
-
     {
         "name" : "Rod of Fireballs",
         "renderable": {
@@ -1488,35 +1422,44 @@
         "vision_range" : 4,
         "movement" : "static",
         "health": "1d1",
-        "challenge_rating": 0,
-        "attributes" : {
-            "intelligence" : 13
-        },
+        "attributes": {},
         "equipped" : [ "Cudgel", "Cloth Tunic", "Cloth Pants", "Slippers" ],
         "faction" : "Townsfolk",
+        "xp": 0,
         "gold" : "2d6",
         "vendor" : [ "food" ]
+    },
+    {
+        "name" : "Kobold",
+        "renderable": {
+            "glyph" : "k",
+            "fg" : "#FF0000",
+            "bg" : "#000000",
+            "order" : 1
+        },
+        "blocks_tile" : true,
+        "vision_range" : 6,
+        "movement" : "random",
+        "health": "1d4",
+        "attributes": {},
+        "xp": 25,
+        "faction" : "Enemies"
     },
 
     {
         "name" : "Goblin",
         "renderable": {
             "glyph" : "g",
-            "fg" : "#FF0000",
+            "fg" : "#00FF00",
             "bg" : "#000000",
             "order" : 1
         },
         "blocks_tile" : true,
         "vision_range" : 8,
         "movement" : "random",
-        "challenge_rating": -2,
-        "health": "2d6",
-        "attributes" : {
-            "strength" : 8,
-            "dexterity" : 14,
-            "constitution": 10,
-            "intelligence": 10
-        },
+        "health": "1d6",
+        "attributes": {},
+        "xp": 50,
         "equipped" : ["Dagger"],
         "faction" : "Enemies"
     },
@@ -1531,14 +1474,9 @@
         "blocks_tile" : true,
         "vision_range" : 8,
         "movement" : "random",
-        "challenge_rating": -3,
         "health": "2d8+6",
-        "attributes" : {
-            "strength" : 16,
-            "dexterity" : 12,
-            "constitution": 16,
-            "intelligence": 7
-        },
+        "attributes": {},
+        "xp": 100,
         "equipped" : [ "Greataxe", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
         "faction" : "Enemies"
     },
@@ -1553,14 +1491,9 @@
         "blocks_tile" : true,
         "vision_range" : 6,
         "movement" : "static",
-        "challenge_rating": 1,
         "health": "4d10+4",
-        "attributes" : {
-            "strength" : 12,
-            "dexterity" : 16,
-            "constitution": 12,
-            "intelligence": 2
-        },
+        "attributes": {},
+        "xp": 250,
         "natural" : {
             "armor_class" : 14,
             "attacks" : [
@@ -1583,14 +1516,9 @@
         "blocks_tile" : true,
         "vision_range" : 8,
         "movement" : "random",
-        "challenge_rating": 2,
         "health": "7d10+21",
-        "attributes" : {
-            "strength" : 19,
-            "dexterity" : 8,
-            "constitution": 16,
-            "intelligence": 5
-        },
+        "attributes": {},
+        "xp": 500,
         "equipped" : [ "Greatclub", "Leather Armor", "Leather Boots", "Leather Gloves", "Leather Pants", "Leather Cap" ],
         "faction" : "Enemies"
     },
@@ -1605,14 +1533,9 @@
         "blocks_tile" : true,
         "vision_range" : 8,
         "movement" : "random",
-        "challenge_rating": 5,
         "health": "8d10+40",
-        "attributes" : {
-            "strength" : 18,
-            "dexterity" : 13,
-            "constitution": 20,
-            "intelligence": 7
-        },
+        "attributes": {},
+        "xp": 750,
         "natural" : {
             "armor_class" : 15,
             "attacks" : [

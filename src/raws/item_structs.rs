@@ -14,7 +14,6 @@ pub struct Item {
     pub base_value : Option<f32>,
     pub vendor_category : Option<String>,
     pub magic : Option<MagicItem>,
-    pub attributes : Option<ItemAttributeBonus>,
     pub template_magic : Option<ItemMagicTemplate>
 }
 
@@ -56,14 +55,6 @@ pub struct MagicItem {
     pub class: String,
     pub naming: String,
     pub cursed: Option<bool>
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct ItemAttributeBonus {
-    pub strength : Option<i32>,
-    pub constitution : Option<i32>,
-    pub dexterity : Option<i32>,
-    pub intelligence : Option<i32>
 }
 
 #[derive(Deserialize, Debug, Clone)]

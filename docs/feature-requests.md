@@ -31,3 +31,6 @@
 * Rework status effect duration updates to move them out of the initiative system
   * Add a global turn counter that rotates every 10 frames, make a system read for the counter & run any pre/post turn processing?
 * When we remove turns, add in a "TurnComplete" component with the turn action cost. Then have a system iterate those turn complete components, update the linked entities initiative, and run any status effects on the entity
+* TODO - add creature XP & mana
+* Gain skills by beating bosses
+- xp_to_next_level

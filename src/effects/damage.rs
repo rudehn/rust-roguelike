@@ -1,11 +1,8 @@
-use std::thread::current;
-
 use specs::prelude::*;
 use super::*;
-use crate::components::{Pools, Player, Attributes, Burning, Confusion, SerializeMe, Duration, StatusEffect, 
-    Name, EquipmentChanged, Slow, DamageOverTime, Skills};
+use crate::components::{Pools, Player, Burning, Confusion, SerializeMe, Duration, StatusEffect, 
+    Name, EquipmentChanged, Slow, DamageOverTime};
 use crate::map::Map;
-use crate::raws::get_challenge_rating_data;
 use crate::gamesystem::{player_hp_at_level, mana_at_level, xp_to_next_level};
 use specs::saveload::{MarkedBuilder, SimpleMarker};
 
@@ -58,7 +55,6 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
     let mut gold_gain = 0.0f32;
 
     let mut pools = ecs.write_storage::<Pools>();
-    let mut attributes = ecs.write_storage::<Attributes>();
 
     if let Some(pos) = entity_position(ecs, target) {
         crate::spatial::remove_entity(target, pos as usize);
@@ -68,13 +64,12 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
         if ecs.read_storage::<Player>().get(source).is_some() {
             if let Some(stats) = pools.get(target) {
 
-                xp_gain +=  get_challenge_rating_data(&stats.level).xp_gain;
+                xp_gain += 0;
                 gold_gain += stats.gold;
             }
 
             if xp_gain != 0 || gold_gain != 0.0 {
                 let mut player_stats = pools.get_mut(source).unwrap();
-                let mut player_attributes = attributes.get_mut(source).unwrap();
                 player_stats.xp += xp_gain;
                 player_stats.gold += gold_gain;
                 if player_stats.xp >= xp_to_next_level(player_stats.level + 1) {
@@ -86,33 +81,12 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                         .append(format!("{}", player_stats.level))
                         .log();
 
-                    // Improve a random attribute
-                    let attr_to_boost = crate::rng::roll_dice(1, 4);
-                    match attr_to_boost {
-                        1 => {
-                            player_attributes.strength.base += 1;
-                            crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel stronger!").log();
-                        }
-                        2 => {
-                            player_attributes.constitution.base += 1;
-                            crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel healthier!").log();
-                        }
-                        3 => {
-                            player_attributes.dexterity.base += 1;
-                            crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel quicker!").log();
-                        }
-                        _ => {
-                            player_attributes.intelligence.base += 1;
-                            crate::gamelog::Logger::new().color(rltk::GREEN).append("You feel smarter!").log();
-                        }
-                    }
-
                     // Improve all skills
-                    let mut skills = ecs.write_storage::<Skills>();
-                    let player_skills = skills.get_mut(*ecs.fetch::<Entity>()).unwrap();
-                    for sk in player_skills.skills.iter_mut() {
-                        *sk.1 += 1;
-                    }
+                    // let mut skills = ecs.write_storage::<Skills>();
+                    // let player_skills = skills.get_mut(*ecs.fetch::<Entity>()).unwrap();
+                    // for sk in player_skills.skills.iter_mut() {
+                    //     *sk.1 += 1;
+                    // }
 
                     ecs.write_storage::<EquipmentChanged>()
                         .insert(
@@ -120,15 +94,9 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                             EquipmentChanged{})
                         .expect("Insert Failed");
 
-                    player_stats.hit_points.max = player_hp_at_level(
-                        player_attributes.constitution.base + player_attributes.constitution.modifiers,
-                        player_stats.level
-                    );
+                    player_stats.hit_points.max = player_hp_at_level(10, player_stats.level);
                     player_stats.hit_points.current = player_stats.hit_points.max;
-                    player_stats.mana.max = mana_at_level(
-                        player_attributes.intelligence.base + player_attributes.intelligence.modifiers,
-                        player_stats.level
-                    );
+                    player_stats.mana.max = mana_at_level(10, player_stats.level);
                     player_stats.mana.current = player_stats.mana.max;
 
                     let player_pos = ecs.fetch::<rltk::Point>();
@@ -231,19 +199,6 @@ pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
                     .build();
             }
         }
-    }
-}
-
-pub fn attribute_effect(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    if let EffectType::AttributeEffect{bonus, name, duration} = &effect.effect_type {
-        ecs.create_entity()
-            .with(StatusEffect{ target })
-            .with(bonus.clone())
-            .with(Duration { turns : *duration })
-            .with(Name { name : name.clone() })
-            .marked::<SimpleMarker<SerializeMe>>()
-            .build();
-        ecs.write_storage::<EquipmentChanged>().insert(target, EquipmentChanged{}).expect("Insert failed");
     }
 }
 

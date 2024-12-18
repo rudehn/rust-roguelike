@@ -1,24 +1,10 @@
 use rltk::prelude::*;
 use specs::prelude::*;
 use crate::{Pools, Map, Name, InBackpack,
-    Equipped, HungerClock, HungerState, Attributes, Attribute, Consumable,
+    Equipped, HungerClock, HungerState, Consumable,
     StatusEffect, Duration, KnownSpells, Weapon, gamelog, gamesystem::xp_to_next_level };
 use super::{draw_tooltips, get_item_display_name, get_item_color};
 
-fn draw_attribute(name : &str, attribute : &Attribute, y : i32, draw_batch: &mut DrawBatch) {
-    let black = RGB::named(rltk::BLACK);
-    let attr_gray : RGB = RGB::from_hex("#CCCCCC").expect("Oops");
-    draw_batch.print_color(Point::new(50, y), name, ColorPair::new(attr_gray, black));
-    let color : RGB =
-        if attribute.modifiers < 0 { RGB::from_f32(1.0, 0.0, 0.0) }
-        else if attribute.modifiers == 0 { RGB::named(rltk::WHITE) }
-        else { RGB::from_f32(0.0, 1.0, 0.0) };
-    draw_batch.print_color(Point::new(67, y), &format!("{}", attribute.base + attribute.modifiers), ColorPair::new(color, black));
-    draw_batch.print_color(Point::new(73, y), &format!("{}", attribute.bonus), ColorPair::new(color, black));
-    if attribute.bonus > 0 { 
-        draw_batch.set(Point::new(72, y), ColorPair::new(color, black), to_cp437('+')); 
-    }
-}
 
 fn box_framework(draw_batch : &mut DrawBatch) {
     let box_gray : RGB = RGB::from_hex("#999999").expect("Oops");
@@ -86,30 +72,11 @@ fn draw_stats(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
     );
 }
 
-fn draw_attributes(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
-    let attributes = ecs.read_storage::<Attributes>();
-    let attr = attributes.get(*player_entity).unwrap();
-    draw_attribute("Strength:", &attr.strength, 4, draw_batch);
-    draw_attribute("Dexterity:", &attr.dexterity, 5, draw_batch);
-    draw_attribute("Constitution:", &attr.constitution, 6, draw_batch);
-    draw_attribute("Intelligence:", &attr.intelligence, 7, draw_batch);
-}
-
 fn initiative_weight(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
-    let attributes = ecs.read_storage::<Attributes>();
-    let attr = attributes.get(*player_entity).unwrap();
     let black = RGB::named(rltk::BLACK);
     let white = RGB::named(rltk::WHITE);
     let pools = ecs.read_storage::<Pools>();
     let player_pools = pools.get(*player_entity).unwrap();
-    draw_batch.print_color(
-        Point::new(50, 9),
-        &format!("{:.0} lbs ({} lbs max)",
-            player_pools.total_weight,
-            (attr.strength.base + attr.strength.modifiers) * 15
-        ),
-        ColorPair::new(white, black)
-    );
     draw_batch.print_color(
         Point::new(50,10), 
         &format!("Initiative Penalty: {:.0}", player_pools.total_initiative_penalty),
@@ -265,7 +232,6 @@ pub fn draw_ui(ecs: &World, ctx : &mut Rltk) {
     box_framework(&mut draw_batch);
     map_label(ecs, &mut draw_batch);
     draw_stats(ecs, &mut draw_batch, &player_entity);
-    draw_attributes(ecs, &mut draw_batch, &player_entity);
     initiative_weight(ecs, &mut draw_batch, &player_entity);
     let mut y = equipped(ecs, &mut draw_batch, &player_entity);
     y += consumables(ecs, &mut draw_batch, &player_entity, y);

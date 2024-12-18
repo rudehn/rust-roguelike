@@ -1,6 +1,6 @@
 use rltk::prelude::*;
 use specs::prelude::*;
-use crate::{Pools, Map, Name, Hidden, camera, Attributes, StatusEffect, Duration };
+use crate::{Pools, Map, Name, Hidden, camera, StatusEffect, Duration };
 use super::get_item_display_name;
 
 struct Tooltip {
@@ -47,7 +47,6 @@ pub fn draw_tooltips(ecs: &World, ctx : &mut Rltk) {
     let (min_x, _max_x, min_y, _max_y) = camera::get_screen_bounds(ecs, ctx);
     let map = ecs.fetch::<Map>();
     let hidden = ecs.read_storage::<Hidden>();
-    let attributes = ecs.read_storage::<Attributes>();
     let pools = ecs.read_storage::<Pools>();
 
     let mouse_pos = ctx.mouse_pos();
@@ -70,24 +69,6 @@ pub fn draw_tooltips(ecs: &World, ctx : &mut Rltk) {
         if hidden.get(entity).is_some() { return; }
         let mut tip = Tooltip::new();
         tip.add(get_item_display_name(ecs, entity));
-
-        // Comment on attributes
-        let attr = attributes.get(entity);
-        if let Some(attr) = attr {
-            let mut s = "".to_string();
-            if attr.strength.bonus < 0 { s += "Weak. " };
-            if attr.strength.bonus > 0 { s += "Strong. " };
-            if attr.dexterity.bonus < 0 { s += "Clumsy. " };
-            if attr.dexterity.bonus > 0 { s += "Agile. " };
-            if attr.constitution.bonus < 0 { s += "Unheathy. " };
-            if attr.constitution.bonus > 0 { s += "Healthy." };
-            if attr.intelligence.bonus < 0 { s += "Unintelligent. "};
-            if attr.intelligence.bonus > 0 { s += "Smart. "};
-            if s.is_empty() {
-                s = "Quite Average".to_string();
-            }
-            tip.add(s);
-        }
 
         // Comment on pools
         let stat = pools.get(entity);

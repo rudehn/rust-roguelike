@@ -9,7 +9,6 @@ mod particles;
 mod triggers;
 mod hunger;
 mod movement;
-use crate::components::AttributeBonus;
 use rltk::Point;
 
 lazy_static! {
@@ -32,7 +31,6 @@ pub enum EffectType {
     Burning { turns: i32 },
     TriggerFire { trigger: Entity },
     TeleportTo { x:i32, y:i32, depth: i32, player_only : bool },
-    AttributeEffect { bonus : AttributeBonus, name : String, duration : i32 },
     Slow { initiative_penalty : f32 },
     DamageOverTime { damage : i32 },
     CreatesTunnel
@@ -103,7 +101,6 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
         EffectType::Confusion{..} => true,
         EffectType::Burning{..} => true,
         EffectType::TeleportTo{..} => true,
-        EffectType::AttributeEffect{..} => true,
         EffectType::Slow{..} => true,
         EffectType::DamageOverTime{..} => true,
         _ => false
@@ -144,7 +141,6 @@ fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
         EffectType::Confusion{..} => damage::add_confusion(ecs, effect, target),
         EffectType::Burning{..} => damage::add_burning(ecs, effect, target),
         EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, target),
-        EffectType::AttributeEffect{..} => damage::attribute_effect(ecs, effect, target),
         EffectType::Slow{..} => damage::slow(ecs, effect, target),
         EffectType::DamageOverTime{..} => damage::damage_over_time(ecs, effect, target),
         _ => {}

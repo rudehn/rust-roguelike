@@ -177,19 +177,10 @@ pub struct Pools {
     pub god_mode : bool
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Attribute {
-    pub base : i32,
-    pub modifiers : i32,
-    pub bonus : i32
-}
-
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Attributes {
-    pub strength : Attribute,
-    pub constitution : Attribute,
-    pub dexterity : Attribute,
-    pub intelligence : Attribute
+    pub accuracy : i32,
+    pub dodge : i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
@@ -236,14 +227,6 @@ pub enum MagicItemClass { Common, Rare, Legendary }
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct MagicItem {
     pub class : MagicItemClass
-}
-
-#[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct AttributeBonus {
-    pub strength : Option<i32>,
-    pub constitution : Option<i32>,
-    pub dexterity : Option<i32>,
-    pub intelligence : Option<i32>
 }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]

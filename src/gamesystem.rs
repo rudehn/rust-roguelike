@@ -36,27 +36,7 @@ pub fn saving_throw(bonus: i32) -> i32 {
 
 pub fn xp_to_next_level(level: i32) -> i32 {
     // Return the amount of exp needed to get to the next level
-    match level {
-        1 => 0,
-        2 => 300,
-        3 => 900,
-        4 => 2700,
-        5 => 6500,
-        6 => 14000,
-        7 => 23000,
-        8 => 34000,
-        9 => 48000,
-        10 => 64000,
-        11 => 85000,
-        12 => 100000,
-        13 => 120000,
-        14 => 140000,
-        15 => 165000,
-        16 => 195000,
-        17 => 225000,
-        18 => 265000,
-        19 => 305000,
-        20 => 355000,
-        _ => 99999999, // TODO - prevent level up
-    }
+    let base_exp = 200;
+    let exponent = 1.5;
+    return base_exp * ((level as f32).powf(exponent) as i32);
 }

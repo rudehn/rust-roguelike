@@ -37,12 +37,6 @@ pub enum SpawnType {
     Carried { by: Entity }
 }
 
-#[derive(Copy, Clone)]
-pub struct CRData {
-    pub xp_gain: i32,
-    pub proficiency_bonus: i32
-}
-
 pub struct RawMaster {
     raws : Raws,
     item_index : HashMap<String, usize>,
@@ -50,8 +44,7 @@ pub struct RawMaster {
     prop_index : HashMap<String, usize>,
     loot_index : HashMap<String, usize>,
     faction_index : HashMap<String, HashMap<String, Reaction>>,
-    spell_index : HashMap<String, usize>,
-    cr_index : HashMap<i32, CRData>
+    spell_index : HashMap<String, usize>
 }
 
 struct NewMagicItem {
@@ -71,15 +64,13 @@ impl RawMaster {
                 faction_table : Vec::new(),
                 spells : Vec::new(),
                 weapon_traits : Vec::new(),
-                challenge_ratings : Vec::new()
             },
             item_index : HashMap::new(),
             mob_index : HashMap::new(),
             prop_index : HashMap::new(),
             loot_index : HashMap::new(),
             faction_index : HashMap::new(),
-            spell_index : HashMap::new(),
-            cr_index : HashMap::new()
+            spell_index : HashMap::new()
         }
     }
 
@@ -249,11 +240,6 @@ impl RawMaster {
             self.faction_index.insert(faction.name.clone(), reactions);
         }
 
-        for challenge_rating in self.raws.challenge_ratings.iter() {
-            self.cr_index.insert(challenge_rating.challenge_rating,
-                CRData{ xp_gain: challenge_rating.xp_gain, proficiency_bonus: challenge_rating.proficiency_bonus});
-        }
-
         for (i,spell) in self.raws.spells.iter().enumerate() {
             self.spell_index.insert(spell.name.clone(), i);
         }
@@ -312,14 +298,6 @@ pub fn get_vendor_items(categories: &[String], raws : &RawMaster) -> Vec<(String
     }
 
     result
-}
-
-pub fn get_challenge_rating_data(challenge_rating: &i32) -> CRData {
-    let raws = &super::RAWS.lock().unwrap();
-    match raws.cr_index.get(challenge_rating) {
-        Some(&d) => d,
-        None => CRData{xp_gain: 0, proficiency_bonus: 0}
-    }
 }
 
 pub fn get_scroll_tags() -> Vec<String> {
@@ -491,7 +469,7 @@ pub fn spawn_named_item(raws: &RawMaster, ecs : &mut World, key : &str, pos : Sp
             if let Some(properties) = &weapon.properties {
                 finesse = properties.contains(&"finesse".to_string());
             }
-            let mut wpn = Weapon{
+            let wpn = Weapon{
                 range : if weapon.range == "melee" { None } else { Some(weapon.range.parse::<i32>().expect("Not a number")) },
                 finesse : finesse,
                 damage_n_dice : n_dice,
@@ -540,15 +518,6 @@ pub fn spawn_named_item(raws: &RawMaster, ecs : &mut World, key : &str, pos : Sp
             }
         }
 
-        if let Some(ab) = &item_template.attributes {
-            eb = eb.with(AttributeBonus{
-                strength : ab.strength,
-                constitution : ab.constitution,
-                dexterity : ab.dexterity,
-                intelligence : ab.intelligence,
-            });
-        }
-
         return Some(eb.build());
     }
     None
@@ -593,41 +562,32 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
             eb = eb.with(BlocksTile{});
         }
 
-        let mut mob_constitution = 10;
-        let mut mob_int = 10;
         let mut attr = Attributes{
-            strength: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
-            constitution: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
-            dexterity: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
-            intelligence: Attribute{ base: 10, modifiers: 0, bonus: attr_bonus(10) },
+            accuracy: 100,
+            dodge: 0,
         };
-        if let Some(strength) = mob_template.attributes.strength {
-            attr.strength = Attribute{ base: strength, modifiers: 0, bonus: attr_bonus(strength) };
+        if let Some(accuracy) = mob_template.attributes.accuracy {
+            attr.accuracy = accuracy;
         }
-        if let Some(constitution) = mob_template.attributes.constitution {
-            attr.constitution = Attribute{ base: constitution, modifiers: 0, bonus: attr_bonus(constitution) };
-            mob_constitution = constitution;
+        if let Some(dodge) = mob_template.attributes.dodge {
+            attr.dodge = dodge;
         }
-        if let Some(dexterity) = mob_template.attributes.dexterity {
-            attr.dexterity = Attribute{ base: dexterity, modifiers: 0, bonus: attr_bonus(dexterity) };
-        }
-        if let Some(intelligence) = mob_template.attributes.intelligence {
-            attr.intelligence = Attribute{ base: intelligence, modifiers: 0, bonus: attr_bonus(intelligence) };
-            mob_int = intelligence;
+        
+        let mut xp = 0;
+        if let Some(xp_gain) = mob_template.xp {
+            xp = xp_gain;
         }
         eb = eb.with(attr);
 
-        let mob_level = mob_template.challenge_rating;
         let (n_dice, die_type, bonus) = parse_dice_string(&mob_template.health);
         let base_health = crate::rng::roll_dice(n_dice, die_type);
         let mob_hp = base_health + bonus;
-        let mob_mana = mana_at_level(mob_int, mob_level);
 
         let pools = Pools{
-            level: mob_level,
-            xp: 0,
+            level: 1,
+            xp: xp,
             hit_points : Pool{ current: mob_hp, max: mob_hp },
-            mana: Pool{current: mob_mana, max: mob_mana},
+            mana: Pool{current: 0, max: 0},
             total_weight : 0.0,
             total_initiative_penalty : 0.0,
             gold : if let Some(gold) = &mob_template.gold {

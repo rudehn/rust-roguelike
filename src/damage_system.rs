@@ -1,14 +1,7 @@
 use specs::prelude::*;
-use super::{Attributes, Pools, Player, Name, RunState, Position,
+use super::{Pools, Player, Name, RunState, Position,
     InBackpack, Equipped, LootTable};
 
-
-pub fn get_evade_stat(attrs: &Attributes) -> i32 {
-    /*
-    Evade stat is 1% per point in dexterity
-    */
-    return attrs.dexterity.base + attrs.dexterity.modifiers;
-}
 
 pub fn delete_the_dead(ecs : &mut World) {
     let mut dead : Vec<Entity> = Vec::new();

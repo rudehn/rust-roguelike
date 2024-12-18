@@ -1,10 +1,6 @@
 use specs::prelude::*;
-use crate::{Attributes, Skills, WantsToMelee, Name,
-    HungerClock, HungerState, Pools, skill_bonus,
-    Skill, Equipped, Weapon, EquipmentSlot, Wearable, NaturalAttackDefense,
-    effects::*, WantsToShoot, Position, Map};
-use crate::raws::get_challenge_rating_data;
-use crate::damage_system::get_evade_stat;
+use crate::{Skills, WantsToMelee, Name, Pools, Equipped, Weapon, EquipmentSlot,
+    Wearable, NaturalAttackDefense, effects::*, WantsToShoot, Position, Map, Attributes};
 use rltk::{to_cp437, RGB, Point};
 
 
@@ -67,15 +63,15 @@ impl<'a> System<'a> for MeleeCombatSystem {
 
                         let natural_roll = crate::rng::roll_dice(1, 100);
                         // Weapons use the strength stat unless it's a finesse weapon, then it can also use Dexterity
-                        let attribute_bonus_stat = attacker_attributes.strength.bonus;
-                        let hit_chance = natural_roll + attribute_bonus_stat +  weapon_info.hit_bonus;
-                        let evade_chance = get_evade_stat( &target_attributes);
+                        
+                        let hit_chance = natural_roll +  weapon_info.hit_bonus;
+                        let evade_chance = target_attributes.dodge;
                         if hit_chance < 100 - evade_chance {
                             // Target hit!
                             let base_damage = crate::rng::roll_dice(weapon_info.damage_n_dice, weapon_info.damage_die_type);
-                            let damage = i32::max(0, base_damage + attribute_bonus_stat + weapon_info.damage_bonus);
-                            // println!("Damage: {} + {}attr + {}weapon = {}",
-                            //     base_damage, attribute_bonus_stat, weapon_damage_bonus, damage
+                            let damage = i32::max(0, base_damage + weapon_info.damage_bonus);
+                            // println!("Damage: {} + {}weapon = {}",
+                            //     base_damage, weapon_damage_bonus, damage
                             // );
                             do_attack_hit(&entity, &wants_melee.target, &name, &target_name, damage, &attack.name);
                         } else {
@@ -97,19 +93,15 @@ impl<'a> System<'a> for MeleeCombatSystem {
                         }
                     }
                     let natural_roll = crate::rng::roll_dice(1, 100);
-                    // Weapons use the strength stat unless it's a finesse weapon, then it can also use Dexterity
-                    let attribute_bonus_stat = if weapon_info.finesse
-                        { i32::max(attacker_attributes.strength.bonus, attacker_attributes.dexterity.bonus) }
-                        else { attacker_attributes.strength.bonus};
                     
-                    let hit_chance = natural_roll + attribute_bonus_stat + weapon_info.hit_bonus;
-                    let evade_chance = get_evade_stat( &target_attributes);
+                    let hit_chance = natural_roll + weapon_info.hit_bonus;
+                    let evade_chance = target_attributes.dodge;
                     if hit_chance < 100 - evade_chance {
                         // Target hit!
                         let base_damage = crate::rng::roll_dice(weapon_info.damage_n_dice, weapon_info.damage_die_type);
-                        let damage = i32::max(0, base_damage + attribute_bonus_stat + weapon_info.damage_bonus);
-                        // println!("Damage: {} + {}attr + {}weapon = {}",
-                        //     base_damage, attribute_bonus_stat, weapon_damage_bonus, damage
+                        let damage = i32::max(0, base_damage + weapon_info.damage_bonus);
+                        // println!("Damage: {} + {}weapon = {}",
+                        //     base_damage, weapon_damage_bonus, damage
                         // );
                         do_attack_hit(&entity, &wants_melee.target, &name, &target_name, damage, "attacks");
                         // Proc effects
@@ -196,13 +188,7 @@ impl<'a> System<'a> for RangedCombatSystem {
                 }
 
                 let natural_roll = crate::rng::roll_dice(1, 100);
-                // All ranged weapons must use the Dexterity attribute bonus
-                let attribute_bonus_stat = attacker_attributes.dexterity.bonus;
-                // let mut skill_bonus_stat = 0;
-                // if let Some(attacker_skills) = skills.get(entity) {
-                //     skill_bonus_stat = skill_bonus(Skill::Melee, &*attacker_skills);
-                // }
-                let hit_chance = natural_roll + attribute_bonus_stat + weapon_info.hit_bonus;
+                let hit_chance = natural_roll + weapon_info.hit_bonus;
        
                 // let mut armor_item_bonus_f = 0.0;
                 // for (wielded,armor) in (&equipped_items, &wearables).join() {
@@ -224,11 +210,11 @@ impl<'a> System<'a> for RangedCombatSystem {
                 //     + armor_item_bonus;
 
                 //println!("Armor class: {}", armor_class);
-                let evade_chance = get_evade_stat( &target_attributes);
+                let evade_chance = target_attributes.dodge;
                 if hit_chance < 100 - evade_chance {
                     // Target hit!
                     let base_damage = crate::rng::roll_dice(weapon_info.damage_n_dice, weapon_info.damage_die_type);
-                    let damage = i32::max(0, base_damage + attribute_bonus_stat + weapon_info.damage_bonus);
+                    let damage = i32::max(0, base_damage + weapon_info.damage_bonus);
                     do_attack_hit(&entity, &wants_shoot.target, &name, &target_name, damage, "shoots");
                     // Proc effects
                     trigger_proc_effects(&entity, &wants_shoot.target, &weapon_info, weapon_entity);

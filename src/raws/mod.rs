@@ -38,7 +38,6 @@ pub struct Raws {
     pub faction_table : Vec<FactionInfo>,
     pub spells : Vec<Spell>,
     pub weapon_traits : Vec<WeaponTrait>,
-    pub challenge_ratings : Vec<ChallengeRating>
 }
 
 pub fn load_raws() {

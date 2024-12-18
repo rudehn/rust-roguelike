@@ -2,9 +2,8 @@ use rltk::{ RGB, Rect };
 use specs::prelude::*;
 use super::{Pools, Pool, Player, Renderable, Name, Position, Viewshed,
     SerializeMe, random_table::MasterTable, HungerClock, HungerState, Map, TileType, raws::*,
-    Attribute, Attributes, Skills, Skill, LightSource, Initiative, Faction, EquipmentChanged,
-    OtherLevelPosition, MasterDungeonMap, EntryTrigger, TeleportTo, SingleActivation,
-    StatusEffect, Duration, AttributeBonus, KnownSpells };
+    Attributes, Skills, Skill, LightSource, Initiative, Faction, EquipmentChanged,
+    OtherLevelPosition, MasterDungeonMap, EntryTrigger, TeleportTo, SingleActivation, KnownSpells };
 use specs::saveload::{MarkedBuilder, SimpleMarker};
 use std::collections::HashMap;
 use crate::{attr_bonus, player_hp_at_level, mana_at_level};
@@ -32,10 +31,8 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
         .with(Name{name: "Player".to_string() })
         .with(HungerClock{ state: HungerState::WellFed, duration: 20 })
         .with(Attributes{
-            strength: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            constitution: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            dexterity: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
-            intelligence: Attribute{ base: 11, modifiers: 0, bonus: attr_bonus(11) },
+            accuracy: 100,
+            dodge: 0,
         })
         .with(skills)
         .with(Pools{
@@ -72,20 +69,6 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Shortbow", SpawnType::Carried{by : player});
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
     // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Tunneling", SpawnType::Carried{by : player});
-
-    // Starting hangover
-    // ecs.create_entity()
-    //     .with(StatusEffect{ target : player })
-    //     .with(Duration{ turns:10 })
-    //     .with(Name{ name: "Hangover".to_string() })
-    //     .with(AttributeBonus{
-    //         strength : Some(-1),
-    //         constitution : None,
-    //         dexterity : Some(-1),
-    //         intelligence : Some(-1)
-    //     })
-    //     .marked::<SimpleMarker<SerializeMe>>()
-    //     .build();
 
     player
 }

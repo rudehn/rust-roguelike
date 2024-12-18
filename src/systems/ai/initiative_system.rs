@@ -1,5 +1,5 @@
 use specs::prelude::*;
-use crate::{rng::roll_dice, Attributes, Burning, DamageOverTime, Duration, EquipmentChanged, Initiative, MyTurn, Pools, Position, RunState, StatusEffect};
+use crate::{rng::roll_dice, Burning, DamageOverTime, Duration, EquipmentChanged, Initiative, MyTurn, Position, RunState, StatusEffect};
 
 pub struct InitiativeSystem {}
 
@@ -9,11 +9,9 @@ impl<'a> System<'a> for InitiativeSystem {
                         ReadStorage<'a, Position>,
                         WriteStorage<'a, MyTurn>,
                         Entities<'a>,
-                        ReadStorage<'a, Attributes>,
                         WriteExpect<'a, RunState>,
                         ReadExpect<'a, Entity>,
                         ReadExpect<'a, rltk::Point>,
-                        ReadStorage<'a, Pools>,
                         WriteStorage<'a, Duration>,
                         WriteStorage<'a, EquipmentChanged>,
                         ReadStorage<'a, StatusEffect>,
@@ -22,8 +20,8 @@ impl<'a> System<'a> for InitiativeSystem {
                     );
 
     fn run(&mut self, data : Self::SystemData) {
-        let (mut initiatives, positions, mut turns, entities, attributes,
-            mut runstate, player, player_pos, pools, mut durations, mut dirty,
+        let (mut initiatives, positions, mut turns, entities,
+            mut runstate, player, player_pos, mut durations, mut dirty,
             statuses, dots, burning) = data;
 
         if *runstate != RunState::Ticking { return; }
@@ -39,16 +37,6 @@ impl<'a> System<'a> for InitiativeSystem {
 
                 // Re-roll
                 initiative.current = 6 + crate::rng::roll_dice(1, 6);
-
-                // Give a bonus for dexterity
-                if let Some(attr) = attributes.get(entity) {
-                    initiative.current -= attr.dexterity.bonus;
-                }
-
-                // Apply pool penalty
-                if let Some(pools) = pools.get(entity) {
-                    initiative.current += f32::floor(pools.total_initiative_penalty) as i32;
-                }
 
                 // TODO: More initiative granting boosts/penalties will go here later
 

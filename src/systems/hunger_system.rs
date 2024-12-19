@@ -21,7 +21,7 @@ impl<'a> System<'a> for HungerSystem {
                 match clock.state {
                     HungerState::WellFed => {
                         clock.state = HungerState::Normal;
-                        clock.duration = 200;
+                        clock.duration = 1000;
                         if entity == *player_entity {
                             crate::gamelog::Logger::new()
                                 .color(rltk::ORANGE)
@@ -31,7 +31,7 @@ impl<'a> System<'a> for HungerSystem {
                     }
                     HungerState::Normal => {
                         clock.state = HungerState::Hungry;
-                        clock.duration = 200;
+                        clock.duration = 1000;
                         if entity == *player_entity {
                             crate::gamelog::Logger::new()
                                 .color(rltk::ORANGE)

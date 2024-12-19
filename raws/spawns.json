@@ -24,7 +24,7 @@
 
 "faction_table" : [
     { "name" : "Player", "responses": { }},
-     { "name" : "Enemies", "responses" : { "Default" : "attack", "Enemies" : "ignore" } },
+    { "name" : "Enemies", "responses" : { "Default" : "attack", "Enemies" : "ignore" } },
     { "name" : "Townsfolk", "responses" : { "Default" : "flee", "Player" : "ignore", "Townsfolk" : "ignore" } }
 ],
 

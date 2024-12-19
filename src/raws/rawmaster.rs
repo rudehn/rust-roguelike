@@ -244,8 +244,8 @@ impl RawMaster {
             self.spell_index.insert(spell.name.clone(), i);
         }
 
-        self.build_magic_weapon_or_armor(&items_to_build);
-        self.build_traited_weapons(&items_to_build);
+        // self.build_magic_weapon_or_armor(&items_to_build);
+        // self.build_traited_weapons(&items_to_build);
     }
 }
 

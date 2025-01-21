@@ -36,7 +36,7 @@ pub fn saving_throw(bonus: i32) -> i32 {
 
 pub fn xp_to_next_level(level: i32) -> i32 {
     // Return the amount of exp needed to get to the next level
-    let base_exp = 200;
+    let base_exp = 100;
     let exponent = 1.5;
-    return base_exp * ((level as f32).powf(exponent) as i32);
+    return base_exp * (((level - 1) as f32).powf(exponent) as i32);
 }

@@ -5,7 +5,8 @@ use super::{Position, Player, Viewshed, State, Map, RunState, Attributes, WantsT
     WantsToPickupItem, TileType, HungerClock, HungerState,
     EntityMoved, Door, BlocksTile, BlocksVisibility, Renderable, Pools, Faction,
     raws::Reaction, Vendor, VendorMode, WantsToCastSpell, Target, Equipped, Weapon,
-    WantsToShoot, Name, InBackpack};
+    WantsToShoot, Name, InBackpack, Initiative, DEFAULT_ACTION_COST, MOVE_ACTION_COST};
+use super::systems::ai::{apply_attack_action_cost, apply_generic_action_cost, apply_move_action_cost};
 
 fn get_player_target_list(ecs : &mut World) -> Vec<(f32,Entity)> {
     let mut possible_targets : Vec<(f32,Entity)> = Vec::new();
@@ -111,6 +112,7 @@ fn cycle_target(ecs: &mut World) {
 }
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState {
+    let player_entity = ecs.fetch::<Entity>();
     let mut positions = ecs.write_storage::<Position>();
     let players = ecs.read_storage::<Player>();
     let mut viewsheds = ecs.write_storage::<Viewshed>();
@@ -125,6 +127,8 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
     let mut renderables = ecs.write_storage::<Renderable>();
     let factions = ecs.read_storage::<Faction>();
     let vendors = ecs.read_storage::<Vendor>();
+    let mut initiatives = ecs.write_storage::<Initiative>();
+    let mut initiative = initiatives.get_mut(*player_entity).unwrap();
     let mut result = RunState::AwaitingInput;
 
     let mut swap_entities : Vec<(Entity, i32, i32)> = Vec::new();
@@ -162,6 +166,9 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
                 let mut ppos = ecs.write_resource::<Point>();
                 ppos.x = pos.x;
                 ppos.y = pos.y;
+
+                apply_move_action_cost(initiative);
+                
                 return Some(RunState::Ticking);
             } else {
                 let target = combat_stats.get(potential_target);
@@ -178,6 +185,8 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
                 let glyph = renderables.get_mut(potential_target).unwrap();
                 glyph.glyph = rltk::to_cp437('/');
                 viewshed.dirty = true;
+                apply_generic_action_cost(initiative);
+
                 return Some(RunState::Ticking);
             }
             None
@@ -191,6 +200,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState 
             let mut ppos = ecs.write_resource::<Point>();
             ppos.x = pos.x;
             ppos.y = pos.y;
+            apply_move_action_cost(initiative);
             result = RunState::Ticking;
             match map.tiles[destination_idx] {
                 TileType::DownStairs => result = RunState::NextLevel,
@@ -271,6 +281,10 @@ fn get_item(ecs: &mut World) {
     let entities = ecs.entities();
     let items = ecs.read_storage::<Item>();
     let positions = ecs.read_storage::<Position>();
+    let mut initiatives = ecs.write_storage::<Initiative>();
+
+    let mut initiative = initiatives.get_mut(*player_entity).unwrap();
+    apply_generic_action_cost(initiative);
 
     let mut target_item : Option<Entity> = None;
     for (item_entity, _item, position) in (&entities, &items, &positions).join() {
@@ -292,8 +306,11 @@ fn skip_turn(ecs: &mut World) -> RunState {
     let player_entity = ecs.fetch::<Entity>();
     let viewshed_components = ecs.read_storage::<Viewshed>();
     let factions = ecs.read_storage::<Faction>();
-
+    let mut initiatives = ecs.write_storage::<Initiative>();
     let worldmap_resource = ecs.fetch::<Map>();
+
+    let mut initiative = initiatives.get_mut(*player_entity).unwrap();
+    apply_generic_action_cost(initiative);
 
     let mut can_heal = true;
     let viewshed = viewshed_components.get(*player_entity).unwrap();

@@ -14,8 +14,6 @@ mod spell_structs;
 pub use spell_structs::Spell;
 mod weapon_traits;
 pub use weapon_traits::*;
-mod effect_structs;
-pub use effect_structs::*;
 
 mod rawmaster;
 pub use rawmaster::*;

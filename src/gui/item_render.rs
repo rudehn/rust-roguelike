@@ -9,10 +9,10 @@ pub fn get_item_color(ecs : &World, item : Entity) -> RGB {
             return RGB::from_f32(1.0, 0.0, 0.0);
         }
     }
-
     if let Some(magic) = ecs.read_storage::<MagicItem>().get(item) {
         match magic.class {
             MagicItemClass::Common => return RGB::from_f32(0.5, 1.0, 0.5),
+            MagicItemClass::Uncommon => return RGB::from_f32(0.5, 1.0,1.0),
             MagicItemClass::Rare => return RGB::from_f32(0.0, 1.0, 1.0),
             MagicItemClass::Legendary => return RGB::from_f32(0.71, 0.15, 0.93)
         }

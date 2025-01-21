@@ -1,6 +1,7 @@
 use specs::prelude::*;
 use crate::{Skills, WantsToMelee, Name, Pools, Equipped, Weapon, EquipmentSlot,
-    Wearable, NaturalAttackDefense, effects::*, WantsToShoot, Position, Map, Attributes};
+    Wearable, NaturalAttackDefense, AttackEffect, effects::*, WantsToShoot,Initiative, Position, Map, Attributes};
+use super::ai::apply_attack_action_cost;
 use rltk::{to_cp437, RGB, Point};
 
 
@@ -17,18 +18,21 @@ impl<'a> System<'a> for MeleeCombatSystem {
                         ReadStorage<'a, Equipped>,
                         ReadStorage<'a, Weapon>,
                         ReadStorage<'a, Wearable>,
-                        ReadStorage<'a, NaturalAttackDefense>
+                        ReadStorage<'a, NaturalAttackDefense>,
+                        WriteStorage<'a, Initiative>
                       );
 
     fn run(&mut self, data : Self::SystemData) {
-        let (entities, mut wants_melee, names, attributes, skills, pools, equipped_items, weapon, wearables, natural) = data;
+        let (entities, mut wants_melee, names, attributes, skills, pools, equipped_items, weapon, wearables, natural, mut initiatives) = data;
         
-        for (entity, wants_melee, name, attacker_attributes, attacker_pools) in (&entities, &wants_melee, &names, &attributes, &pools).join() {
+        for (entity, wants_melee, name, attacker_attributes, attacker_pools, attacker_initiative) in (&entities, &wants_melee, &names, &attributes, &pools, &mut initiatives).join() {
             // Are the attacker and defender alive? Only attack if they are
             let target_pools = pools.get(wants_melee.target).unwrap();
             let target_attributes = attributes.get(wants_melee.target).unwrap();
             if attacker_pools.hit_points.current > 0 && target_pools.hit_points.current > 0 {
                 let target_name = names.get(wants_melee.target).unwrap();
+                // All attacks, including multi attack, take the same amount of action cost
+                apply_attack_action_cost(attacker_initiative);
 
                 // For melee combat, we have several scenarios to cover
                 // - The entity has 1 or more natual attacks (IE bite + claw + claw) and we want to roll all attacks
@@ -41,7 +45,6 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 // or overwritten by natural attacks
                 let mut weapon_info = Weapon{
                     range: None,
-                    finesse: false,
                     hit_bonus : 0,
                     damage_n_dice : 1,
                     damage_die_type : 4,
@@ -62,8 +65,7 @@ impl<'a> System<'a> for MeleeCombatSystem {
                         weapon_info.damage_bonus = attack.damage_bonus;
 
                         let natural_roll = crate::rng::roll_dice(1, 100);
-                        // Weapons use the strength stat unless it's a finesse weapon, then it can also use Dexterity
-                        
+                       
                         let hit_chance = natural_roll +  weapon_info.hit_bonus;
                         let evade_chance = target_attributes.dodge;
                         if hit_chance < 100 - evade_chance {
@@ -74,6 +76,10 @@ impl<'a> System<'a> for MeleeCombatSystem {
                             //     base_damage, weapon_damage_bonus, damage
                             // );
                             do_attack_hit(&entity, &wants_melee.target, &name, &target_name, damage, &attack.name);
+                            // Trigger any proc effects from natural attacks
+                            if let Some(effects) = &attack.effect{
+                                trigger_proc_effects_nat_attack(&entity, &wants_melee.target, &effects);
+                            }
                         } else {
                             // Miss
                             log_miss(&name, &target_name, &attack.name);
@@ -133,19 +139,22 @@ impl<'a> System<'a> for RangedCombatSystem {
                         ReadStorage<'a, Weapon>,
                         ReadStorage<'a, Wearable>,
                         ReadStorage<'a, Position>,
-                        ReadExpect<'a, Map>
+                        ReadExpect<'a, Map>,
+                        WriteStorage<'a, Initiative>
                       );
 
     fn run(&mut self, data : Self::SystemData) {
         let (entities, mut wants_shoot, names, attributes, skills, pools, equipped_items, weapon, wearables,
-            positions, map) = data;
+            positions, map, mut initiatives) = data;
 
-        for (entity, wants_shoot, name, attacker_attributes, attacker_pools) in (&entities, &wants_shoot, &names, &attributes, &pools).join() {
+        for (entity, wants_shoot, name, attacker_attributes, attacker_pools, attacker_initiative) in (&entities, &wants_shoot, &names, &attributes, &pools, &mut initiatives).join() {
             // Are the attacker and defender alive? Only attack if they are
             let target_pools = pools.get(wants_shoot.target).unwrap();
             let target_attributes = attributes.get(wants_shoot.target).unwrap();
             if attacker_pools.hit_points.current > 0 && target_pools.hit_points.current > 0 {
                 let target_name = names.get(wants_shoot.target).unwrap();
+                // All attacks, including multi attack, take the same amount of action cost
+                apply_attack_action_cost(attacker_initiative);
 
                 // Fire projectile effect
                 let apos = positions.get(entity).unwrap();
@@ -170,7 +179,6 @@ impl<'a> System<'a> for RangedCombatSystem {
                 // Define the basic unarmed attack - overridden by wielding check below if a weapon is equipped
                 let mut weapon_info = Weapon{
                     range: None,
-                    finesse: false,
                     hit_bonus : 0,
                     damage_n_dice : 1,
                     damage_die_type : 4,
@@ -210,7 +218,8 @@ impl<'a> System<'a> for RangedCombatSystem {
                 //     + armor_item_bonus;
 
                 //println!("Armor class: {}", armor_class);
-                let evade_chance = target_attributes.dodge;
+                // Apply a 10% hit penalty to ranged attacks
+                let evade_chance = 10 + target_attributes.dodge;
                 if hit_chance < 100 - evade_chance {
                     // Target hit!
                     let base_damage = crate::rng::roll_dice(weapon_info.damage_n_dice, weapon_info.damage_die_type);
@@ -243,6 +252,25 @@ fn trigger_proc_effects(attacker: &Entity, defender: &Entity, weapon_info: &Weap
             add_effect(
                 Some(*attacker),
                 EffectType::ItemUse{ item: weapon_entity.unwrap() },
+                effect_target
+            )
+        }
+    }
+}
+
+fn trigger_proc_effects_nat_attack(attacker: &Entity, defender: &Entity, nat_attack: &AttackEffect){
+    // Proc effects
+    if let Some(chance) = &nat_attack.proc_chance {
+        let roll = crate::rng::roll_dice(1, 100);
+        if roll <= (chance * 100.0) as i32 {
+            let effect_target = if nat_attack.proc_target.clone().unwrap_or("Target".to_string()) == "Self" {
+                Targets::Single{ target: *attacker }
+            } else {
+                Targets::Single { target : *defender }
+            };
+            add_effect(
+                Some(*attacker),
+                EffectType::NatAttack{ effects: nat_attack.proc_effects.clone()},
                 effect_target
             )
         }

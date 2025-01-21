@@ -1,6 +1,8 @@
 use specs::prelude::*;
 use crate::{Map, Position, BlocksTile, ApplyMove, ApplyTeleport, OtherLevelPosition, EntityMoved,
-    Viewshed, RunState};
+    Viewshed, RunState, Initiative, };
+
+use super::ai::apply_move_action_cost;
 
 pub struct MovementSystem {}
 
@@ -16,12 +18,14 @@ impl<'a> System<'a> for MovementSystem {
                         WriteStorage<'a, EntityMoved>,
                         WriteStorage<'a, Viewshed>,
                         ReadExpect<'a, Entity>,
-                        WriteExpect<'a, RunState>);
+                        WriteExpect<'a, RunState>,
+                        WriteStorage<'a, Initiative>
+                    );
 
     fn run(&mut self, data : Self::SystemData) {
         let (mut map, mut position, blockers, entities, mut apply_move,
             mut apply_teleport, mut other_level, mut moved,
-            mut viewsheds, player_entity, mut runstate) = data;
+            mut viewsheds, player_entity, mut runstate, mut initiatives) = data;
 
         // Apply teleports
         for (entity, teleport) in (&entities, &apply_teleport).join() {
@@ -45,7 +49,8 @@ impl<'a> System<'a> for MovementSystem {
         apply_teleport.clear();
 
         // Apply broad movement
-        for (entity, movement, mut pos) in (&entities, &apply_move, &mut position).join() {
+        for (entity, movement, mut pos, mut initiative) in (&entities, &apply_move, &mut position, &mut initiatives).join() {
+            apply_move_action_cost(initiative);
             let start_idx = map.xy_idx(pos.x, pos.y);
             let dest_idx = movement.dest_idx as usize;
             crate::spatial::move_entity(entity, start_idx, dest_idx);

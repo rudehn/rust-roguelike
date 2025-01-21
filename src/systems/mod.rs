@@ -6,7 +6,7 @@ mod map_indexing_system;
 use map_indexing_system::MapIndexingSystem;
 mod visibility_system;
 use visibility_system::VisibilitySystem;
-mod ai;
+pub mod ai;
 use ai::*;
 mod movement_system;
 use movement_system::MovementSystem;

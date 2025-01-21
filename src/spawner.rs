@@ -3,7 +3,8 @@ use specs::prelude::*;
 use super::{Pools, Pool, Player, Renderable, Name, Position, Viewshed,
     SerializeMe, random_table::MasterTable, HungerClock, HungerState, Map, TileType, raws::*,
     Attributes, Skills, Skill, LightSource, Initiative, Faction, EquipmentChanged,
-    OtherLevelPosition, MasterDungeonMap, EntryTrigger, TeleportTo, SingleActivation, KnownSpells };
+    OtherLevelPosition, MasterDungeonMap, EntryTrigger, TeleportTo, SingleActivation, KnownSpells,
+    DEFAULT_ENERGY_GAIN};
 use specs::saveload::{MarkedBuilder, SimpleMarker};
 use std::collections::HashMap;
 use crate::{attr_bonus, player_hp_at_level, mana_at_level};
@@ -27,7 +28,7 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
             render_order: 0
         })
         .with(Player{})
-        .with(Viewshed{ visible_tiles : Vec::new(), range: 8, dirty: true })
+        .with(Viewshed{ visible_tiles : Vec::new(), range: 12, dirty: true })
         .with(Name{name: "Player".to_string() })
         .with(HungerClock{ state: HungerState::WellFed, duration: 200 })
         .with(Attributes{
@@ -52,22 +53,21 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
             god_mode : false
         })
         .with(EquipmentChanged{})
-        .with(LightSource{ color: rltk::RGB::from_f32(1.0, 1.0, 0.5), range: 8 })
-        .with(Initiative{current: 0})
+        .with(LightSource{ color: rltk::RGB::from_f32(1.0, 1.0, 0.5), range: 12 })
+        .with(Initiative{
+            energy_gain: DEFAULT_ENERGY_GAIN,
+            attack_action_mult: 1.0,
+            move_action_mult: 1.0,
+            current: 0})
         .with(Faction{name : "Player".to_string() })
         .with(KnownSpells{ spells : Vec::new() })
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
 
     // Starting equipment
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rusty Longsword", SpawnType::Equipped{by : player});
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Dried Sausage", SpawnType::Carried{by : player} );
     spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Beer", SpawnType::Carried{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Stained Tunic", SpawnType::Equipped{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Torn Trousers", SpawnType::Equipped{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Old Boots", SpawnType::Equipped{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Shortbow", SpawnType::Carried{by : player});
-    spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
+    // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
     // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Tunneling", SpawnType::Carried{by : player});
 
     player

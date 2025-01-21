@@ -91,6 +91,9 @@ pub struct LightSource {
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Initiative {
+    pub energy_gain: i32, // How many action points the creature recovers per per turn
+    pub attack_action_mult: f32, // The creature's multiplier to the cost to perform an attack action
+    pub move_action_mult: f32, // The creature's multiplier to the cost to perform a move action
     pub current : i32
 }
 
@@ -222,7 +225,7 @@ pub struct Item {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
-pub enum MagicItemClass { Common, Rare, Legendary }
+pub enum MagicItemClass { Common, Uncommon, Rare, Legendary }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct MagicItem {
@@ -261,12 +264,12 @@ pub struct AreaOfEffect {
 
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct InflictsConfusion {
+pub struct InflictsParalysis {
     pub turns: i32
 }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct Confusion {}
+pub struct Paralysis {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct InflictsBurning {
@@ -373,7 +376,6 @@ pub struct Equipped {
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Weapon {
     pub range : Option<i32>,
-    pub finesse : bool,
     pub damage_n_dice : i32,
     pub damage_die_type : i32,
     pub damage_bonus : i32,
@@ -388,13 +390,29 @@ pub struct Wearable {
     pub slot : EquipmentSlot
 }
 
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EffectValues {
+    pub amount: Option<i32>,
+    pub duration: Option<i32>,
+    pub value: Option<String>
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct AttackEffect {
+    pub proc_chance : Option<f32>,
+    pub proc_target : Option<String>,
+    pub proc_effects : HashMap<String, EffectValues>
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NaturalAttack {
     pub name : String,
     pub damage_n_dice : i32,
     pub damage_die_type : i32,
     pub damage_bonus : i32,
-    pub hit_bonus : i32
+    pub hit_bonus : i32,
+    pub effect: Option<AttackEffect>,
 }
 
 #[derive(Component, Serialize, Deserialize, Clone)]

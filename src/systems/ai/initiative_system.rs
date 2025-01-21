@@ -1,5 +1,6 @@
 use specs::prelude::*;
-use crate::{rng::roll_dice, Burning, DamageOverTime, Duration, EquipmentChanged, Initiative, MyTurn, Position, RunState, StatusEffect};
+use crate::{rng::roll_dice, Burning, DamageOverTime, Duration, EquipmentChanged, Initiative,
+    MyTurn, Position, RunState, StatusEffect, DEFAULT_ACTION_COST, MOVE_ACTION_COST, ATTACK_ACTION_COST, Name};
 
 pub struct InitiativeSystem {}
 
@@ -16,13 +17,14 @@ impl<'a> System<'a> for InitiativeSystem {
                         WriteStorage<'a, EquipmentChanged>,
                         ReadStorage<'a, StatusEffect>,
                         ReadStorage<'a, DamageOverTime>,
-                        ReadStorage<'a, Burning>
+                        ReadStorage<'a, Burning>,
+                        ReadStorage<'a, Name>
                     );
 
     fn run(&mut self, data : Self::SystemData) {
         let (mut initiatives, positions, mut turns, entities,
             mut runstate, player, player_pos, mut durations, mut dirty,
-            statuses, dots, burning) = data;
+            statuses, dots, burning, names) = data;
 
         if *runstate != RunState::Ticking { return; }
 
@@ -31,25 +33,32 @@ impl<'a> System<'a> for InitiativeSystem {
 
         // Roll initiative
         for (entity, initiative, pos) in (&entities, &mut initiatives, &positions).join() {
-            initiative.current -= 1;
-            if initiative.current < 1 {
+            initiative.current += initiative.energy_gain;
+            let entity_name = names.get(entity);
+            if let Some(entity_name) = entity_name {
+                println!("{} has {} energy", entity_name.name, initiative.current);
+            }
+            else {
+                println!("unknown has {} energy", initiative.current);
+            }
+            // Several options here
+            // 1. It's the players turn
+            // 2. It's the enemies turn, but they are too far away, so don't process them
+            // 3. It's the enemies turn and they are nearby
+            if initiative.current >= 0 {
                 let mut myturn = true;
-
-                // Re-roll
-                initiative.current = 6 + crate::rng::roll_dice(1, 6);
-
-                // TODO: More initiative granting boosts/penalties will go here later
 
                 // If its the player, we want to go to an AwaitingInput state
                 if entity == *player {
                     // Give control to the player
                     *runstate = RunState::AwaitingInput;
-                } else {
-                    let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, rltk::Point::new(pos.x, pos.y));
-                    if distance > 20.0 {
-                        myturn = false;
-                    }
                 }
+                //  else {
+                //     let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, rltk::Point::new(pos.x, pos.y));
+                //     if distance > 20.0 {
+                //         myturn = false;
+                //     }
+                // }
 
                 // It's my turn!
                 if myturn {
@@ -101,4 +110,23 @@ impl<'a> System<'a> for InitiativeSystem {
             }
         }
     }
+}
+
+pub fn apply_move_action_cost(initiative: &mut Initiative) {
+    println!("move before: {}", initiative.current);
+    initiative.current -= (MOVE_ACTION_COST as f32 * initiative.move_action_mult).round() as i32;
+    println!("move after: {}", initiative.current);
+}
+
+
+pub fn apply_attack_action_cost(initiative: &mut Initiative) {
+    println!("attack before: {}", initiative.current);
+    initiative.current -= (ATTACK_ACTION_COST as f32 * initiative.attack_action_mult).round() as i32;
+    println!("attack after: {}", initiative.current);
+}
+
+pub fn apply_generic_action_cost(initiative: &mut Initiative) {
+    println!("generic before: {}", initiative.current);
+    initiative.current -= DEFAULT_ACTION_COST;
+    println!("generic after: {}", initiative.current);
 }

@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use specs::prelude::*;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
+use crate::components::EffectValues;
 use crate::map::Map;
 mod damage;
 mod targeting;
@@ -10,6 +11,7 @@ mod triggers;
 mod hunger;
 mod movement;
 use rltk::Point;
+use crate::raws::spawn_natural_attack;
 
 lazy_static! {
     pub static ref EFFECT_QUEUE : Mutex<VecDeque<EffectSpawner>> = Mutex::new(VecDeque::new());
@@ -27,13 +29,14 @@ pub enum EffectType {
     WellFed,
     Healing { amount : i32 },
     Mana { amount : i32 },
-    Confusion { turns : i32 },
+    Paralysis { turns : i32 },
     Burning { turns: i32 },
     TriggerFire { trigger: Entity },
     TeleportTo { x:i32, y:i32, depth: i32, player_only : bool },
     Slow { initiative_penalty : f32 },
     DamageOverTime { damage : i32 },
-    CreatesTunnel
+    CreatesTunnel,
+    NatAttack {effects: HashMap<String, EffectValues>}
 }
 
 #[derive(Clone, Debug)]
@@ -82,6 +85,9 @@ fn target_applicator(ecs : &mut World, effect : &mut EffectSpawner) {
         triggers::spell_trigger(effect.creator, spell, &effect.targets, ecs);
     } else if let EffectType::TriggerFire{trigger} = effect.effect_type {
         triggers::trigger(effect.creator, trigger, &effect.targets, ecs);
+    } else if let EffectType::NatAttack { effects } = &effect.effect_type {
+        let nat_attack = spawn_natural_attack(ecs, effects.clone());
+        triggers::nat_attack_trigger(effect.creator, nat_attack, &effect.targets, ecs);
     } else {
        match &effect.targets.clone() {
             Targets::Tile{tile_idx} => affect_tile(ecs, effect, *tile_idx),
@@ -98,7 +104,7 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
         EffectType::WellFed => true,
         EffectType::Healing{..} => true,
         EffectType::Mana{..} => true,
-        EffectType::Confusion{..} => true,
+        EffectType::Paralysis{..} => true,
         EffectType::Burning{..} => true,
         EffectType::TeleportTo{..} => true,
         EffectType::Slow{..} => true,
@@ -138,7 +144,7 @@ fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
         EffectType::WellFed => hunger::well_fed(ecs, effect, target),
         EffectType::Healing{..} => damage::heal_damage(ecs, effect, target),
         EffectType::Mana{..} => damage::restore_mana(ecs, effect, target),
-        EffectType::Confusion{..} => damage::add_confusion(ecs, effect, target),
+        EffectType::Paralysis{..} => damage::add_paralysis(ecs, effect, target),
         EffectType::Burning{..} => damage::add_burning(ecs, effect, target),
         EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, target),
         EffectType::Slow{..} => damage::slow(ecs, effect, target),

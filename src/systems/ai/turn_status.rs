@@ -1,5 +1,6 @@
 use specs::prelude::*;
-use crate::{MyTurn, Confusion, RunState, StatusEffect, effects::add_effect, effects::EffectType, effects::Targets};
+use crate::{MyTurn, Paralysis, Initiative, RunState, StatusEffect, effects::add_effect, effects::EffectType, effects::Targets};
+use super::initiative_system::apply_generic_action_cost;
 use std::collections::HashSet;
 
 pub struct TurnStatusSystem {}
@@ -7,14 +8,15 @@ pub struct TurnStatusSystem {}
 impl<'a> System<'a> for TurnStatusSystem {
     #[allow(clippy::type_complexity)]
     type SystemData = ( WriteStorage<'a, MyTurn>,
-                        ReadStorage<'a, Confusion>,
+                        ReadStorage<'a, Paralysis>,
                         Entities<'a>,
                         ReadExpect<'a, RunState>,
-                        ReadStorage<'a, StatusEffect>
+                        ReadStorage<'a, StatusEffect>,
+                        WriteStorage<'a, Initiative>
                     );
 
     fn run(&mut self, data : Self::SystemData) {
-        let (mut turns, confusion, entities, runstate, statuses) = data;
+        let (mut turns, paralysis, entities, runstate, statuses, mut initiatives) = data;
 
         if *runstate != RunState::Ticking { return; }
 
@@ -28,13 +30,13 @@ impl<'a> System<'a> for TurnStatusSystem {
         let mut not_my_turn : Vec<Entity> = Vec::new();
         for (effect_entity, status_effect) in (&entities, &statuses).join() {
             if entity_turns.contains(&status_effect.target) {
-                // Skip turn for confusion
-                if confusion.get(effect_entity).is_some() {
+                // Skip turn for paralysis
+                if paralysis.get(effect_entity).is_some() {
                     add_effect(
                         None, 
                         EffectType::Particle{
                             glyph : rltk::to_cp437('?'),
-                            fg : rltk::RGB::named(rltk::CYAN),
+                            fg : rltk::RGB::named(rltk::YELLOW),
                             bg : rltk::RGB::named(rltk::BLACK),
                             lifespan: 200.0
                         },
@@ -47,6 +49,10 @@ impl<'a> System<'a> for TurnStatusSystem {
 
         for e in not_my_turn {
             turns.remove(e);
+            let initiative = initiatives.get(e);
+            // if let Some(mut initiative) = initiative {
+            //     apply_generic_action_cost(&mut initiative);
+            // }
         }
     }
 }

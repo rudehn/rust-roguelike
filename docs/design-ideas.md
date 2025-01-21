@@ -170,3 +170,6 @@ torso: 40%
 legs: 25%
 feet: 10%
 hands: 10%
+
+
+https://github.com/jice-nospam/doryen-rs/tree/master/docs/demo

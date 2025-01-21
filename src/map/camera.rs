@@ -6,7 +6,7 @@ use crate::map::tile_glyph;
 pub fn get_screen_bounds(ecs: &World, _ctx:  &mut Rltk) -> (i32, i32, i32, i32) {
     let player_pos = ecs.fetch::<Point>();
     //let (x_chars, y_chars) = ctx.get_char_size();
-    let (x_chars, y_chars) = (48, 44);
+    let (x_chars, y_chars) = (98, 64);
 
     let center_x = (x_chars / 2) as i32;
     let center_y = (y_chars / 2) as i32;
@@ -27,6 +27,8 @@ pub fn render_camera(ecs: &World, ctx : &mut Rltk) {
     let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs, ctx);
 
     // Render the Map
+    let x_offset = 30;
+    let y_offset = 0;
 
     let map_width = map.width-1;
     let map_height = map.height-1;
@@ -38,14 +40,14 @@ pub fn render_camera(ecs: &World, ctx : &mut Rltk) {
                 if map.revealed_tiles[idx] {
                     let (glyph, fg, bg) = tile_glyph(idx, &*map);
                     draw_batch.set(
-                        Point::new(x+1, y+1),
+                        Point::new(x_offset + x+1, y_offset + y+1),
                         ColorPair::new(fg, bg),
                         glyph
                     );
                 }
             } else if SHOW_BOUNDARIES {
                 draw_batch.set(
-                    Point::new(x+1, y+1),
+                    Point::new(x_offset + x+1, y_offset + y+1),
                     ColorPair::new(RGB::named(rltk::GRAY), RGB::named(rltk::BLACK)),
                     to_cp437('·')
                 );
@@ -76,7 +78,7 @@ pub fn render_camera(ecs: &World, ctx : &mut Rltk) {
                         let entity_screen_y = (cy + pos.y) - min_y;
                         if entity_screen_x > 0 && entity_screen_x < map_width && entity_screen_y > 0 && entity_screen_y < map_height {
                             draw_batch.set(
-                                Point::new(entity_screen_x + 1, entity_screen_y + 1),
+                                Point::new(x_offset as i32 + entity_screen_x + 1, y_offset as i32 + entity_screen_y + 1),
                                 ColorPair::new(render.fg, render.bg),
                                 render.glyph
                             );
@@ -91,7 +93,7 @@ pub fn render_camera(ecs: &World, ctx : &mut Rltk) {
                 let entity_screen_y = pos.y - min_y;
                 if entity_screen_x > 0 && entity_screen_x < map_width && entity_screen_y > 0 && entity_screen_y < map_height {
                     draw_batch.set(
-                        Point::new(entity_screen_x + 1, entity_screen_y + 1),
+                        Point::new(x_offset as i32 + entity_screen_x + 1, y_offset as i32 + entity_screen_y + 1),
                         ColorPair::new(render.fg, render.bg),
                         render.glyph
                     );

@@ -12,3 +12,6 @@
 * A* pathfinding is incredibly slow
 * Targeting with the bow can sometimes cause an exception
 * Casting damage through a staff doesn't log damage
+* SimpleMapBuilder sometimes puts starting & ending stairs in the same room
+* Map covers up the console log
+* turn_status system should consume energy

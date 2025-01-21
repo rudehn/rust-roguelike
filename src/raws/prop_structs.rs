@@ -1,7 +1,7 @@
 use serde::{Deserialize};
 use super::{Renderable};
 use std::collections::HashMap;
-use super::EffectValues;
+use crate::components::EffectValues;
 
 #[derive(Deserialize, Debug)]
 pub struct Prop {

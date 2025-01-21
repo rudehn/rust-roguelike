@@ -2,6 +2,15 @@ use super::*;
 use crate::components::*;
 use crate::RunState;
 
+pub fn nat_attack_trigger(creator: Option<Entity>, attack: Entity, targets: &Targets, ecs : &mut World){
+
+    // Use the natural attack via the generic system
+    event_trigger(creator, attack, targets, ecs);
+
+    // Delete the natural attack entity
+    ecs.entities().delete(attack);
+}
+
 pub fn item_trigger(creator : Option<Entity>, item: Entity, targets : &Targets, ecs: &mut World) {
     // Check charges
     if let Some(c) = ecs.write_storage::<Consumable>().get_mut(item) {
@@ -182,9 +191,9 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
         did_something = true;
     }
 
-    // Confusion
-    if let Some(confusion) = ecs.read_storage::<InflictsConfusion>().get(entity) {
-        add_effect(creator, EffectType::Confusion{ turns : confusion.turns }, targets.clone());
+    // Paralysis
+    if let Some(paralysis) = ecs.read_storage::<InflictsParalysis>().get(entity) {
+        add_effect(creator, EffectType::Paralysis{ turns : paralysis.turns }, targets.clone());
         did_something = true;
     }
 
@@ -238,7 +247,7 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
         did_something = true;
     }
 
-    if let Some(tunneling) = ecs.read_storage::<CreatesTunnel>().get(entity) {
+    if let Some(_tunneling) = ecs.read_storage::<CreatesTunnel>().get(entity) {
         add_effect(creator, EffectType::CreatesTunnel{}, targets.clone());
         did_something = true;
     }

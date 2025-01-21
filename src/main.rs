@@ -3,6 +3,8 @@ use rltk::{GameState, Rltk, Point};
 use specs::prelude::*;
 use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 
+mod constants;
+pub use constants::*;
 mod components;
 pub use components::*;
 mod map;
@@ -392,7 +394,7 @@ impl GameState for State {
 
         rltk::render_draw_buffer(ctx);
         if SHOW_FPS {
-            ctx.print(1, 59, &format!("FPS: {}", ctx.fps));
+            ctx.print(1, 69, &format!("FPS: {}", ctx.fps));
         }
     }
 }
@@ -460,11 +462,11 @@ impl State {
 
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
-    let context = RltkBuilder::simple(80, 60)
+    let context = RltkBuilder::simple(120, 70)
         .unwrap()
         .with_title("Caverns Descent")
         .with_font("vga8x16.png", 8, 16)
-        .with_sparse_console(80, 30, "vga8x16.png")
+        .with_sparse_console(120, 40, "vga8x16.png")
         .with_vsync(false)
         .build()?;
     // context.with_post_scanlines(true);
@@ -493,8 +495,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<WantsToPickupItem>();
     gs.ecs.register::<WantsToUseItem>();
     gs.ecs.register::<WantsToDropItem>();
-    gs.ecs.register::<Confusion>();
-    gs.ecs.register::<InflictsConfusion>();
+    gs.ecs.register::<Paralysis>();
+    gs.ecs.register::<InflictsParalysis>();
     gs.ecs.register::<Burning>();
     gs.ecs.register::<InflictsBurning>();
     gs.ecs.register::<CreatesTunnel>();

@@ -1,6 +1,6 @@
 use serde::{Deserialize};
 use std::collections::HashMap;
-use super::EffectValues;
+use crate::components::EffectValues;
 
 #[derive(Deserialize, Debug)]
 pub struct WeaponTrait {

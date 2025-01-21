@@ -1,6 +1,6 @@
 use specs::prelude::*;
 use super::*;
-use crate::components::{Pools, Player, Burning, Confusion, SerializeMe, Duration, StatusEffect, 
+use crate::components::{Pools, Player, Burning, Paralysis, SerializeMe, Duration, StatusEffect, 
     Name, EquipmentChanged, Slow, DamageOverTime};
 use crate::map::Map;
 use crate::gamesystem::{player_hp_at_level, mana_at_level, xp_to_next_level};
@@ -63,8 +63,7 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
     if let Some(source) = effect.creator {
         if ecs.read_storage::<Player>().get(source).is_some() {
             if let Some(stats) = pools.get(target) {
-
-                xp_gain += 0;
+                xp_gain += stats.xp;
                 gold_gain += stats.gold;
             }
 
@@ -156,13 +155,13 @@ pub fn restore_mana(ecs: &mut World, mana: &EffectSpawner, target: Entity) {
     }
 }
 
-pub fn add_confusion(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    if let EffectType::Confusion{turns} = &effect.effect_type {
+pub fn add_paralysis(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
+    if let EffectType::Paralysis{turns} = &effect.effect_type {
         ecs.create_entity()
             .with(StatusEffect{ target })
-            .with(Confusion{})
+            .with(Paralysis{})
             .with(Duration{ turns : *turns})
-            .with(Name{ name : "Confusion".to_string() })
+            .with(Name{ name : "Paralysis".to_string() })
             .marked::<SimpleMarker<SerializeMe>>()
             .build();
     }
@@ -170,7 +169,6 @@ pub fn add_confusion(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
 
 
 pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    println!("Adding burning to an entity");
     if let EffectType::Burning{turns} = &effect.effect_type {
         // If the target is currently burning, just reset the duration counter
         // TODO - need to check if an existing status effect w/ burning & duration componenets exists

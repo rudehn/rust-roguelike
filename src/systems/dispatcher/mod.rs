@@ -22,7 +22,7 @@ pub trait UnifiedDispatcher {
 construct_dispatcher!(
     (MapIndexingSystem, "map_index", &[]),
     (VisibilitySystem, "visibility", &[]),
-    (EncumbranceSystem, "encumbrance", &[]),
+    // (EncumbranceSystem, "encumbrance", &[]),
     (InitiativeSystem, "initiative", &[]),
     (TurnStatusSystem, "turnstatus", &[]),
     (QuipSystem, "quips", &[]),

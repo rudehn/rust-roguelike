@@ -1,5 +1,6 @@
 use serde::{Deserialize};
-use super::{Renderable};
+use super::Renderable;
+use crate::components::{AttackEffect, EffectValues};
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
@@ -28,6 +29,9 @@ pub struct Mob {
 
 #[derive(Deserialize, Debug)]
 pub struct MobAttributes {
+    pub energy: Option<i32>, // How many action points the creature recovers per per turn
+    pub attack_action_mult: Option<f32>, // The creature's multiplier to the cost to perform an attack action
+    pub move_action_mult: Option<f32>, // The creature's multiplier to the cost to perform a move action
     pub accuracy : Option<i32>,
     pub dodge : Option<i32>,
 }
@@ -42,7 +46,8 @@ pub struct MobNatural {
 pub struct NaturalAttack {
     pub name : String,
     pub hit_bonus : i32,
-    pub damage : String
+    pub damage : String,
+    pub on_hit: Option<AttackEffect>
 }
 
 #[derive(Deserialize, Debug)]

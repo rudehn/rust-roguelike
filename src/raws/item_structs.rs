@@ -1,6 +1,6 @@
 use serde::{Deserialize};
 use std::collections::HashMap;
-use super::EffectValues;
+use crate::components::EffectValues;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Item {
@@ -14,7 +14,6 @@ pub struct Item {
     pub base_value : Option<f32>,
     pub vendor_category : Option<String>,
     pub magic : Option<MagicItem>,
-    pub template_magic : Option<ItemMagicTemplate>
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -55,12 +54,4 @@ pub struct MagicItem {
     pub class: String,
     pub naming: String,
     pub cursed: Option<bool>
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct ItemMagicTemplate {
-    pub unidentified_name: String,
-    pub bonus_min: i32,
-    pub bonus_max: i32,
-    pub include_cursed: bool
 }

@@ -3,7 +3,7 @@ use specs::prelude::*;
 use crate::{gamelog, gamesystem::xp_to_next_level, Consumable, Duration, Equipped, HungerClock, HungerState, InBackpack, KnownSpells, Map, Name, Pools, Renderable, StatusEffect, Weapon, Paralysis, Burning, Slow, Haste };
 use super::{draw_tooltips, get_item_display_name, get_item_color};
 use crate::vision::get_characters_in_vision;
-use crate::constants::{STATUS_BURNING_COLOR, STATUS_GENERIC_COLOR, STATUS_HASTE_COLOR, STATUS_PARALYSIS_COLOR, STATUS_SLOW_COLOR}
+use crate::constants::{STATUS_BURNING_COLOR, STATUS_GENERIC_COLOR, STATUS_HASTE_COLOR, STATUS_PARALYSIS_COLOR, STATUS_SLOW_COLOR};
 
 
 pub fn draw_bar_horizontal(

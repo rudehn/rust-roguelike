@@ -42,6 +42,4 @@ Alertness (sleep, etc)
 
 
 pool.total_weight
-pool.total_initiative_penalty
 spawns Item.attributes
-EncumbranceSystem

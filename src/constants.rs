@@ -1,5 +1,8 @@
 use rltk::{BLUE, GREEN, ORANGE, PURPLE, YELLOW};
 
+// Game Mechanics
+pub const AMULET_LEVEL: i32 = 10;
+
 // Colors for consistent UI displaying status effects
 pub const STATUS_GENERIC_COLOR: (u8, u8, u8) = BLUE;
 pub const STATUS_PARALYSIS_COLOR: (u8, u8, u8) = YELLOW;

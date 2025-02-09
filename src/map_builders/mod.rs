@@ -1,6 +1,8 @@
 use super::{Map, TileType, Position, spawner, SHOW_MAPGEN_VISUALIZER};
 use rltk::{Rect};
 use specs::prelude::*;
+use crate::constants::AMULET_LEVEL;
+
 mod simple_map;
 mod algorithms;
 mod utility;
@@ -54,8 +56,6 @@ pub struct BuilderMap {
     pub width: i32,
     pub height: i32
 }
-
-pub const AMULET_LEVEL: i32 = 10;
 
 impl BuilderMap {
     fn take_snapshot(&mut self) {

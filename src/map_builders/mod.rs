@@ -57,10 +57,6 @@ pub struct BuilderMap {
 
 pub const AMULET_LEVEL: i32 = 10;
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>());
-}
-
 impl BuilderMap {
     fn take_snapshot(&mut self) {
         if SHOW_MAPGEN_VISUALIZER {

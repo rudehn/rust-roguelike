@@ -1,9 +1,9 @@
 use rltk::prelude::*;
 use specs::prelude::*;
-use crate::{Pools, Map, Name, InBackpack,
-    Equipped, HungerClock, HungerState, Consumable,
-    StatusEffect, Duration, KnownSpells, Weapon, gamelog, gamesystem::xp_to_next_level };
+use crate::{gamelog, gamesystem::xp_to_next_level, Consumable, Duration, Equipped, HungerClock, HungerState, InBackpack, KnownSpells, Map, Name, Pools, Renderable, StatusEffect, Weapon, Paralysis, Burning, Slow, Haste };
 use super::{draw_tooltips, get_item_display_name, get_item_color};
+use crate::vision::get_characters_in_vision;
+use crate::constants::{STATUS_BURNING_COLOR, STATUS_GENERIC_COLOR, STATUS_HASTE_COLOR, STATUS_PARALYSIS_COLOR, STATUS_SLOW_COLOR}
 
 
 pub fn draw_bar_horizontal(
@@ -103,11 +103,6 @@ fn initiative_weight(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &En
     let white = RGB::named(rltk::WHITE);
     let pools = ecs.read_storage::<Pools>();
     let player_pools = pools.get(*player_entity).unwrap();
-    draw_batch.print_color(
-        Point::new(1,10), 
-        &format!("Initiative Penalty: {:.0}", player_pools.total_initiative_penalty),
-        ColorPair::new(white, black)
-    );
     draw_batch.print_color(
         Point::new(1,11), 
         &format!("Gold: {:.1}", player_pools.gold),
@@ -251,18 +246,116 @@ fn status(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
     }
 }
 
+fn draw_entity_in_view(ecs: &World, draw_batch: &mut DrawBatch, entity: &Entity, y: i32) -> i32 {
+    
+    let black = RGB::named(rltk::BLACK);
+    let white = RGB::named(rltk::WHITE);
+    let names = ecs.read_storage::<Name>();
+    let renderables = ecs.read_storage::<Renderable>();
+    let pools = ecs.read_storage::<Pools>();
+    let statuses = ecs.read_storage::<StatusEffect>();
+    let durations = ecs.read_storage::<Duration>();
+    let paralysis = ecs.read_storage::<Paralysis>();
+    let burning = ecs.read_storage::<Burning>();
+    let slow = ecs.read_storage::<Slow>();
+    let haste = ecs.read_storage::<Haste>();
+    let entities = ecs.entities();
+
+    let mut lines_drawn = 0;
+    let mut display_name = "";
+    let mut display_char = 0;
+    let mut fg = RGB::named(rltk::WHITE);
+    if let Some(name) = names.get(*entity){
+        display_name = &name.name;
+    }
+    if let Some(renderable) = renderables.get(*entity){
+        display_char = renderable.glyph;
+        fg = renderable.fg;
+    }
+
+    if !display_name.is_empty() && display_char != 0{
+        lines_drawn += 1;
+        draw_batch.set(
+            Point::new(1, y),
+            ColorPair::new(fg, black),
+            display_char
+        );
+        draw_batch.print_color(
+            Point::new(2, y),
+            &format!(": {}", display_name),
+            ColorPair::new(fg, black),
+        );
+    }
+    if let Some(pools) = pools.get(*entity){
+        let health = "Health";
+        draw_batch.print_color(Point::new(1, y + lines_drawn), &health, ColorPair::new(white, black));
+        draw_bar_horizontal(
+            draw_batch,
+            Point::new(8, y + lines_drawn), 
+            14, 
+            pools.hit_points.current, 
+            pools.hit_points.max, 
+            RGBA::named(rltk::RED),
+            RGBA::named(rltk::BLACK)
+        );
+        lines_drawn += 1;
+    }
+    // TODO - optimize, can we call in entities function & pass in hashmap?
+    for (status_entity, status, duration, name) in (&entities, &statuses, &durations, &names).join() {
+        let mut color = STATUS_GENERIC_COLOR;
+        if let Some(_para) = paralysis.get(status_entity){
+            color = STATUS_PARALYSIS_COLOR;
+        } else if let Some(_burn) = burning.get(status_entity) {
+            color = STATUS_BURNING_COLOR;
+        } else if let Some(_slow) = slow.get(status_entity) {
+            color = STATUS_SLOW_COLOR;
+        } else if let Some(_haste) = haste.get(status_entity) {
+            color = STATUS_HASTE_COLOR;
+        }
+        if status.target == *entity {
+            // Print status name
+            draw_batch.print_color(Point::new(1, y + lines_drawn), &name.name, ColorPair::new(white, black));
+            draw_bar_horizontal(
+                draw_batch,
+                Point::new(10, y + lines_drawn), 
+                14, 
+                duration.turns, 
+                duration.total_turns, 
+                RGBA::named(color),
+                RGBA::named(rltk::BLACK)
+            );
+            lines_drawn += 1;
+        }
+    }
+
+    lines_drawn
+}
+
+fn entities(ecs: &World, draw_batch: &mut DrawBatch, player_entity: &Entity) {
+    let entities = get_characters_in_vision(ecs, player_entity);
+    let mut y = 1;
+    let player_lines_drawn = draw_entity_in_view(ecs, draw_batch, player_entity, y);
+    y += player_lines_drawn + 1; // Give an extra row to space out entities
+
+    for entity in entities.iter(){
+        let lines_drawn = draw_entity_in_view(ecs, draw_batch, entity, y);
+        y += lines_drawn + 1; // Give an extra row to space out entities
+    }
+}
+
 pub fn draw_ui(ecs: &World, ctx : &mut Rltk) {
     let mut draw_batch = DrawBatch::new();
     let player_entity = ecs.fetch::<Entity>();
 
     // box_framework(&mut draw_batch);
     map_label(ecs, &mut draw_batch);
-    draw_stats(ecs, &mut draw_batch, &player_entity);
-    initiative_weight(ecs, &mut draw_batch, &player_entity);
-    let mut y = equipped(ecs, &mut draw_batch, &player_entity);
-    y += consumables(ecs, &mut draw_batch, &player_entity, y);
-    spells(ecs, &mut draw_batch, &player_entity, y);
-    status(ecs, &mut draw_batch, &player_entity);
+    // draw_stats(ecs, &mut draw_batch, &player_entity);
+    entities(ecs, &mut draw_batch, &player_entity);
+    // initiative_weight(ecs, &mut draw_batch, &player_entity);
+    // let mut y = equipped(ecs, &mut draw_batch, &player_entity);
+    // y += consumables(ecs, &mut draw_batch, &player_entity, y);
+    // spells(ecs, &mut draw_batch, &player_entity, y);
+    // status(ecs, &mut draw_batch, &player_entity);
     gamelog::print_log(&mut rltk::BACKEND_INTERNAL.lock().consoles[1].console, Point::new(30, 0));
     draw_tooltips(ecs, ctx);
 

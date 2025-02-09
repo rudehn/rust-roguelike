@@ -385,7 +385,7 @@ macro_rules! apply_effects {
                 "paralysis" => $eb = $eb.with(InflictsParalysis{ turns: effect.1.duration.unwrap() }),
                 "burning" => $eb = $eb.with(InflictsBurning{turns: 7}),
                 "tunneling" => $eb = $eb.with(CreatesTunnel{}),
-                "duration" => $eb = $eb.with(Duration{turns: effect.1.amount.unwrap()  }),
+                "duration" => $eb = $eb.with(Duration{turns: effect.1.amount.unwrap(), total_turns: effect.1.amount.unwrap() }),
                 "magic_mapping" => $eb = $eb.with(MagicMapper{}),
                 "town_portal" => $eb = $eb.with(TownPortal{}),
                 "food" => $eb = $eb.with(ProvidesFood{}),
@@ -394,8 +394,8 @@ macro_rules! apply_effects {
                 "particle" => $eb = $eb.with(parse_particle(effect.1.value.as_ref().unwrap())),
                 "remove_curse" => $eb = $eb.with(ProvidesRemoveCurse{}),
                 "identify" => $eb = $eb.with(ProvidesIdentification{}),
-                "slow" => $eb = $eb.with(Slow{ initiative_penalty : effect.1.amount.unwrap() as f32}),
-                "damage_over_time" => $eb = $eb.with( DamageOverTime { damage : effect.1.amount.unwrap() } ),
+                "slow" => $eb = $eb.with(Slow{}),
+                "haste" => $eb = $eb.with(Haste{}),
                 "target_self" => $eb = $eb.with( AlwaysTargetsSelf{} ),
                 _ => rltk::console::log(format!("Warning: consumable effect {} not implemented.", effect_name))
             }
@@ -577,7 +577,6 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
             hit_points : Pool{ current: mob_hp, max: mob_hp },
             mana: Pool{current: 0, max: 0},
             total_weight : 0.0,
-            total_initiative_penalty : 0.0,
             gold : if let Some(gold) = &mob_template.gold {
                     let (n, d, b) = parse_dice_string(&gold);
                     (crate::rng::roll_dice(n, d) + b) as f32
@@ -587,7 +586,6 @@ pub fn spawn_named_mob(raws: &RawMaster, ecs : &mut World, key : &str, pos : Spa
             god_mode : false
         };
         eb = eb.with(pools);
-        eb = eb.with(EquipmentChanged{});
 
         eb = eb.with(Viewshed{ visible_tiles : Vec::new(), range: mob_template.vision_range, dirty: true });
 

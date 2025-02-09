@@ -58,11 +58,11 @@ pub fn save_game(ecs : &mut World) {
             EntryTrigger, EntityMoved, SingleActivation, BlocksVisibility, Door,
             Quips, Attributes, Skills, Pools, NaturalAttackDefense, LootTable,
             OtherLevelPosition, DMSerializationHelper, LightSource, Initiative, MyTurn, Faction,
-            WantsToApproach, WantsToFlee, MoveMode, Chasing, EquipmentChanged, Vendor, TownPortal,
+            WantsToApproach, WantsToFlee, MoveMode, Chasing, Vendor, TownPortal,
             TeleportTo, ApplyMove, ApplyTeleport, MagicItem, ObfuscatedName, IdentifiedItem,
             SpawnParticleBurst, SpawnParticleLine, CursedItem, ProvidesRemoveCurse, ProvidesIdentification, StatusEffect, Duration, KnownSpells, SpellTemplate, WantsToCastSpell, TeachesSpell,
-            ProvidesMana, Slow, DamageOverTime, SpecialAbilities, TileSize, OnDeath, AlwaysTargetsSelf,
-            Target, WantsToShoot
+            ProvidesMana, Haste, Slow, SpecialAbilities, TileSize, OnDeath, AlwaysTargetsSelf,
+            Target, WantsToShoot, GameStats
         );
     }
 
@@ -116,11 +116,11 @@ pub fn load_game(ecs: &mut World) {
             EntryTrigger, EntityMoved, SingleActivation, BlocksVisibility, Door,
             Quips, Attributes, Skills, Pools, NaturalAttackDefense, LootTable,
             OtherLevelPosition, DMSerializationHelper, LightSource, Initiative, MyTurn, Faction,
-            WantsToApproach, WantsToFlee, MoveMode, Chasing, EquipmentChanged, Vendor, TownPortal,
+            WantsToApproach, WantsToFlee, MoveMode, Chasing, Vendor, TownPortal,
             TeleportTo, ApplyMove, ApplyTeleport, MagicItem, ObfuscatedName, IdentifiedItem,
             SpawnParticleBurst, SpawnParticleLine, CursedItem, ProvidesRemoveCurse, ProvidesIdentification, StatusEffect, Duration, KnownSpells, SpellTemplate, WantsToCastSpell, TeachesSpell,
-            ProvidesMana, Slow, DamageOverTime, SpecialAbilities, TileSize, OnDeath, AlwaysTargetsSelf,
-            Target, WantsToShoot
+            ProvidesMana, Haste, Slow, SpecialAbilities, TileSize, OnDeath, AlwaysTargetsSelf,
+            Target, WantsToShoot, GameStats
         );
     }
 

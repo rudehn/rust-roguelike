@@ -33,8 +33,8 @@ pub enum EffectType {
     Burning { turns: i32 },
     TriggerFire { trigger: Entity },
     TeleportTo { x:i32, y:i32, depth: i32, player_only : bool },
-    Slow { initiative_penalty : f32 },
-    DamageOverTime { damage : i32 },
+    Slow,
+    Haste,
     CreatesTunnel,
     NatAttack {effects: HashMap<String, EffectValues>}
 }
@@ -107,8 +107,8 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
         EffectType::Paralysis{..} => true,
         EffectType::Burning{..} => true,
         EffectType::TeleportTo{..} => true,
-        EffectType::Slow{..} => true,
-        EffectType::DamageOverTime{..} => true,
+        EffectType::Slow => true,
+        EffectType::Haste => true,
         _ => false
     }
 }
@@ -147,8 +147,8 @@ fn affect_entity(ecs: &mut World, effect: &mut EffectSpawner, target: Entity) {
         EffectType::Paralysis{..} => damage::add_paralysis(ecs, effect, target),
         EffectType::Burning{..} => damage::add_burning(ecs, effect, target),
         EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, target),
-        EffectType::Slow{..} => damage::slow(ecs, effect, target),
-        EffectType::DamageOverTime{..} => damage::damage_over_time(ecs, effect, target),
+        EffectType::Slow => damage::slow(ecs, effect, target),
+        EffectType::Haste => damage::haste(ecs, effect, target),
         _ => {}
     }
 }

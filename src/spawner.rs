@@ -2,7 +2,7 @@ use rltk::{ RGB, Rect };
 use specs::prelude::*;
 use super::{Pools, Pool, Player, Renderable, Name, Position, Viewshed,
     SerializeMe, random_table::MasterTable, HungerClock, HungerState, Map, TileType, raws::*,
-    Attributes, Skills, Skill, LightSource, Initiative, Faction, EquipmentChanged,
+    Attributes, Skills, Skill, LightSource, Initiative, Faction,
     OtherLevelPosition, MasterDungeonMap, EntryTrigger, TeleportTo, SingleActivation, KnownSpells,
     DEFAULT_ENERGY_GAIN};
 use specs::saveload::{MarkedBuilder, SimpleMarker};
@@ -29,7 +29,7 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
         })
         .with(Player{})
         .with(Viewshed{ visible_tiles : Vec::new(), range: 12, dirty: true })
-        .with(Name{name: "Player".to_string() })
+        .with(Name{name: "You".to_string() })
         .with(HungerClock{ state: HungerState::WellFed, duration: 200 })
         .with(Attributes{
             accuracy: 100,
@@ -48,11 +48,9 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
             xp: 0,
             level: 1,
             total_weight : 0.0,
-            total_initiative_penalty : 0.0,
             gold : 0.0,
             god_mode : false
         })
-        .with(EquipmentChanged{})
         .with(LightSource{ color: rltk::RGB::from_f32(1.0, 1.0, 0.5), range: 12 })
         .with(Initiative{
             energy_gain: DEFAULT_ENERGY_GAIN,
@@ -70,6 +68,7 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
     // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Fireballs2", SpawnType::Carried{by : player});
     // spawn_named_entity(&RAWS.lock().unwrap(), ecs, "Rod of Tunneling", SpawnType::Carried{by : player});
 
+    
     player
 }
 

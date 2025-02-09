@@ -1,6 +1,6 @@
 use specs::prelude::*;
 use crate::{WantsToCastSpell, WantsToDropItem, WantsToPickupItem, WantsToRemoveItem, WantsToUseItem,
-    Name, Equippable, Equipped, InBackpack, Position, EquipmentChanged, IdentifiedItem, CursedItem,
+    Name, Equippable, Equipped, InBackpack, Position, IdentifiedItem, CursedItem,
     Item, Map, AreaOfEffect, MagicItem, ObfuscatedName, MasterDungeonMap };
 use crate::effects::*;
 
@@ -40,7 +40,6 @@ impl<'a> System<'a> for ItemCollectionSystem {
                         WriteStorage<'a, Position>,
                         ReadStorage<'a, Name>,
                         WriteStorage<'a, InBackpack>,
-                        WriteStorage<'a, EquipmentChanged>,
                         ReadStorage<'a, MagicItem>,
                         ReadStorage<'a, ObfuscatedName>,
                         ReadExpect<'a, MasterDungeonMap>
@@ -48,13 +47,12 @@ impl<'a> System<'a> for ItemCollectionSystem {
 
     fn run(&mut self, data : Self::SystemData) {
         let (player_entity, mut wants_pickup, mut positions, names,
-            mut backpack, mut dirty, magic_items, obfuscated_names, dm) = data;
+            mut backpack, magic_items, obfuscated_names, dm) = data;
 
         for pickup in wants_pickup.join() {
             positions.remove(pickup.item);
             backpack.insert(pickup.item, InBackpack{ owner: pickup.collected_by }).expect("Unable to insert backpack entry");
-            dirty.insert(pickup.collected_by, EquipmentChanged{}).expect("Unable to insert");
-
+            
             if pickup.collected_by == *player_entity {
                 crate::gamelog::Logger::new()
                     .append("You pick up the")
@@ -79,7 +77,6 @@ impl<'a> System<'a> for ItemDropSystem {
                         ReadStorage<'a, Name>,
                         WriteStorage<'a, Position>,
                         WriteStorage<'a, InBackpack>,
-                        WriteStorage<'a, EquipmentChanged>,
                         ReadStorage<'a, MagicItem>,
                         ReadStorage<'a, ObfuscatedName>,
                         ReadExpect<'a, MasterDungeonMap>
@@ -87,7 +84,7 @@ impl<'a> System<'a> for ItemDropSystem {
 
     fn run(&mut self, data : Self::SystemData) {
         let (player_entity, entities, mut wants_drop, names, mut positions,
-            mut backpack, mut dirty, magic_items, obfuscated_names, dm) = data;
+            mut backpack, magic_items, obfuscated_names, dm) = data;
 
         for (entity, to_drop) in (&entities, &wants_drop).join() {
             let mut dropper_pos : Position = Position{x:0, y:0};
@@ -98,8 +95,7 @@ impl<'a> System<'a> for ItemDropSystem {
             }
             positions.insert(to_drop.item, Position{ x : dropper_pos.x, y : dropper_pos.y }).expect("Unable to insert position");
             backpack.remove(to_drop.item);
-            dirty.insert(entity, EquipmentChanged{}).expect("Unable to insert");
-
+            
             if entity == *player_entity {
                 crate::gamelog::Logger::new()
                     .append("You drop the")
@@ -125,7 +121,6 @@ impl<'a> System<'a> for ItemEquipOnUse {
                         ReadStorage<'a, Equippable>,
                         WriteStorage<'a, Equipped>,
                         WriteStorage<'a, InBackpack>,
-                        WriteStorage<'a, EquipmentChanged>,
                         WriteStorage<'a, IdentifiedItem>,
                         ReadStorage<'a, CursedItem>
                       );
@@ -133,7 +128,7 @@ impl<'a> System<'a> for ItemEquipOnUse {
     #[allow(clippy::cognitive_complexity)]
     fn run(&mut self, data : Self::SystemData) {
         let (player_entity, entities, mut wants_use, names, equippable, 
-            mut equipped, mut backpack, mut dirty, mut identified_item, cursed) = data;
+            mut equipped, mut backpack, mut identified_item, cursed) = data;
 
         let mut remove_use : Vec<Entity> = Vec::new();
         for (target, useitem) in (&entities, &wants_use).join() {
@@ -188,8 +183,7 @@ impl<'a> System<'a> for ItemEquipOnUse {
                             .log();
                     }
 
-                    dirty.insert(target, EquipmentChanged{}).expect("Unable to insert");
-                }
+               }
 
                 // Done with item
                 remove_use.push(target);
@@ -248,11 +242,10 @@ impl<'a> System<'a> for ItemRemoveSystem {
                         WriteStorage<'a, InBackpack>,
                         ReadStorage<'a, CursedItem>,
                         ReadStorage<'a, Name>,
-                        WriteStorage<'a, EquipmentChanged>
                       );
 
     fn run(&mut self, data : Self::SystemData) {
-        let (entities, mut wants_remove, mut equipped, mut backpack, cursed, names, mut dirty) = data;
+        let (entities, mut wants_remove, mut equipped, mut backpack, cursed, names) = data;
 
         for (entity, to_remove) in (&entities, &wants_remove).join() {
             if cursed.get(to_remove.item).is_some() {
@@ -265,7 +258,6 @@ impl<'a> System<'a> for ItemRemoveSystem {
                 equipped.remove(to_remove.item);
                 backpack.insert(to_remove.item, InBackpack{ owner: entity }).expect("Unable to insert backpack");
             }
-            dirty.insert(entity, EquipmentChanged{}).expect("Unable to insert");
         }
 
         wants_remove.clear();
@@ -283,17 +275,15 @@ impl<'a> System<'a> for ItemUseSystem {
                         WriteStorage<'a, WantsToUseItem>,
                         ReadStorage<'a, Name>,
                         ReadStorage<'a, AreaOfEffect>,
-                        WriteStorage<'a, EquipmentChanged>,
                         WriteStorage<'a, IdentifiedItem>
                       );
 
     #[allow(clippy::cognitive_complexity)]
     fn run(&mut self, data : Self::SystemData) {
         let (player_entity, map, entities, mut wants_use, names,
-            aoe, mut dirty, mut identified_item) = data;
+            aoe, mut identified_item) = data;
 
         for (entity, useitem) in (&entities, &wants_use).join() {
-            dirty.insert(entity, EquipmentChanged{}).expect("Unable to insert");
 
             // Identify
             if entity == *player_entity {
@@ -333,17 +323,15 @@ impl<'a> System<'a> for SpellUseSystem {
                         WriteStorage<'a, WantsToCastSpell>,
                         ReadStorage<'a, Name>,
                         ReadStorage<'a, AreaOfEffect>,
-                        WriteStorage<'a, EquipmentChanged>,
                         WriteStorage<'a, IdentifiedItem>
                       );
 
     #[allow(clippy::cognitive_complexity)]
     fn run(&mut self, data : Self::SystemData) {
         let (player_entity, map, entities, mut wants_use, names,
-            aoe, mut dirty, mut identified_item) = data;
+            aoe, mut identified_item) = data;
 
         for (entity, useitem) in (&entities, &wants_use).join() {
-            dirty.insert(entity, EquipmentChanged{}).expect("Unable to insert");
 
             // Identify
             if entity == *player_entity {

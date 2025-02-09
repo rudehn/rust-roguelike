@@ -60,9 +60,7 @@ pub fn create_fire(ecs: &mut World, tile_idx :i32, effect: &EffectSpawner) {
             let burnings = ecs.read_storage::<InflictsBurning>();
             let positions = ecs.read_storage::<Position>();
             for (name, _burn, pos) in (&names, &burnings, &positions).join() {
-                println!("looping through fire entities");
                 if name.name == "Fire"  && pos.x == x && pos.y == y {
-                    println!("Found existing fire on this tile");
                     found_fire = true;
                     break;
                 }

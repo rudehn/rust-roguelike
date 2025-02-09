@@ -28,6 +28,7 @@ extern crate lazy_static;
 mod systems;
 pub mod rng;
 pub mod spatial;
+pub mod vision;
 
 const SHOW_MAPGEN_VISUALIZER : bool = false;
 const SHOW_FPS : bool = true;
@@ -533,7 +534,6 @@ fn main() -> rltk::BError {
     gs.ecs.register::<WantsToFlee>();
     gs.ecs.register::<MoveMode>();
     gs.ecs.register::<Chasing>();
-    gs.ecs.register::<EquipmentChanged>();
     gs.ecs.register::<Vendor>();
     gs.ecs.register::<TownPortal>();
     gs.ecs.register::<TeleportTo>();
@@ -554,18 +554,20 @@ fn main() -> rltk::BError {
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<TeachesSpell>();
     gs.ecs.register::<ProvidesMana>();
+    gs.ecs.register::<Haste>();
     gs.ecs.register::<Slow>();
-    gs.ecs.register::<DamageOverTime>();
     gs.ecs.register::<SpecialAbilities>();
     gs.ecs.register::<TileSize>();
     gs.ecs.register::<OnDeath>();
     gs.ecs.register::<AlwaysTargetsSelf>();
     gs.ecs.register::<Target>();
     gs.ecs.register::<WantsToShoot>();
+    gs.ecs.register::<GameStats>();
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
 
     raws::load_raws();
 
+    gs.ecs.insert(GameStats{game_ticks: 0});
     gs.ecs.insert(map::MasterDungeonMap::new());
     gs.ecs.insert(Map::new(1, 64, 64, "New Map"));
     gs.ecs.insert(Point::new(0, 0));

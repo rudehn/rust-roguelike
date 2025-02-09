@@ -7,6 +7,12 @@ use specs::error::NoError;
 use std::collections::HashMap;
 
 #[derive(Component, ConvertSaveload, Clone)]
+pub struct GameStats {
+    pub game_ticks: i32  // # of tick of time the game has run
+}
+
+
+#[derive(Component, ConvertSaveload, Clone)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -175,7 +181,6 @@ pub struct Pools {
     pub xp : i32,
     pub level : i32, // Need to store 1/8, 1/4, and 1/2 challenge rating as negative numbers
     pub total_weight : f32,
-    pub total_initiative_penalty : f32,
     pub gold : f32,
     pub god_mode : bool
 }
@@ -213,9 +218,6 @@ pub struct Chasing {
 pub struct LootTable {
     pub table : String
 }
-
-#[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct EquipmentChanged {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Item {
@@ -279,19 +281,17 @@ pub struct InflictsBurning {
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Burning {}
 
-#[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct Slow {
-    pub initiative_penalty : f32
-}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct DamageOverTime {
-    pub damage : i32
-}
+pub struct Haste {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct Slow {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Duration {
-    pub turns : i32
+    pub turns : i32,
+    pub total_turns: i32
 }
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]

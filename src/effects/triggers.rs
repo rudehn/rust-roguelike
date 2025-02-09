@@ -199,7 +199,6 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
 
     // Burning
     if let Some(burning) = ecs.read_storage::<InflictsBurning>().get(entity) {
-        println!("Adding the burning effect");
         add_effect(creator, EffectType::Burning{ turns : burning.turns }, targets.clone());
         did_something = true;
     }
@@ -237,13 +236,13 @@ fn event_trigger(creator : Option<Entity>, entity: Entity, targets : &Targets, e
 
     // Slow
     if let Some(slow) = ecs.read_storage::<Slow>().get(entity) {
-        add_effect(creator, EffectType::Slow{ initiative_penalty : slow.initiative_penalty }, targets.clone());
+        add_effect(creator, EffectType::Slow, targets.clone());
         did_something = true;
     }
-
-    // Damage Over Time
-    if let Some(damage) = ecs.read_storage::<DamageOverTime>().get(entity) {
-        add_effect(creator, EffectType::DamageOverTime{ damage : damage.damage }, targets.clone());
+    
+    // Haste
+    if let Some(haste) = ecs.read_storage::<Haste>().get(entity) {
+        add_effect(creator, EffectType::Haste, targets.clone());
         did_something = true;
     }
 

@@ -1,7 +1,7 @@
 use specs::prelude::*;
 use super::*;
 use crate::components::{Pools, Player, Burning, Paralysis, SerializeMe, Duration, StatusEffect, 
-    Name, EquipmentChanged, Slow, DamageOverTime};
+    Name, Slow, Haste};
 use crate::map::Map;
 use crate::gamesystem::{player_hp_at_level, mana_at_level, xp_to_next_level};
 use specs::saveload::{MarkedBuilder, SimpleMarker};
@@ -87,12 +87,6 @@ pub fn death(ecs: &mut World, effect: &EffectSpawner, target : Entity) {
                     //     *sk.1 += 1;
                     // }
 
-                    ecs.write_storage::<EquipmentChanged>()
-                        .insert(
-                            *ecs.fetch::<Entity>(),
-                            EquipmentChanged{})
-                        .expect("Insert Failed");
-
                     player_stats.hit_points.max = player_hp_at_level(10, player_stats.level);
                     player_stats.hit_points.current = player_stats.hit_points.max;
                     player_stats.mana.max = mana_at_level(10, player_stats.level);
@@ -160,7 +154,7 @@ pub fn add_paralysis(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
         ecs.create_entity()
             .with(StatusEffect{ target })
             .with(Paralysis{})
-            .with(Duration{ turns : *turns})
+            .with(Duration{turns : *turns, total_turns: *turns})
             .with(Name{ name : "Paralysis".to_string() })
             .marked::<SimpleMarker<SerializeMe>>()
             .build();
@@ -171,7 +165,6 @@ pub fn add_paralysis(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
 pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
     if let EffectType::Burning{turns} = &effect.effect_type {
         // If the target is currently burning, just reset the duration counter
-        // TODO - need to check if an existing status effect w/ burning & duration componenets exists
         let mut found_status = false;
 
         {
@@ -191,7 +184,7 @@ pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
                 ecs.create_entity()
                     .with(StatusEffect{ target })
                     .with(Burning{})
-                    .with(Duration{ turns : *turns})
+                    .with(Duration{ turns : *turns, total_turns: *turns})
                     .with(Name{ name : "Burning".to_string() })
                     .marked::<SimpleMarker<SerializeMe>>()
                     .build();
@@ -201,31 +194,100 @@ pub fn add_burning(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
 }
 
 pub fn slow(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    if let EffectType::Slow{initiative_penalty} = &effect.effect_type {
-        ecs.create_entity()
-            .with(StatusEffect{ target })
-            .with(Slow{ initiative_penalty : *initiative_penalty })
-            .with(Duration{ turns : 5})
-            .with(
-                if *initiative_penalty > 0.0 {
-                    Name{ name : "Slowed".to_string() }
-                } else {
-                    Name{ name : "Hasted".to_string() }
+    if let EffectType::Slow = &effect.effect_type {
+        let slow_duration = 5;
+
+        let mut found_status = false;
+        let mut entities_to_delete : Vec<Entity> = Vec::new();
+        {
+            let mut durations = ecs.write_storage::<Duration>();
+            let status_effect = ecs.read_storage::<StatusEffect>();
+            let slowed = ecs.read_storage::<Slow>();
+            let hasted = ecs.read_storage::<Haste>();
+            let entities = ecs.entities();
+
+            
+            for (entity, effect, slow, haste, duration) in (&entities, &status_effect, (&slowed).maybe(), (&hasted).maybe(), &mut durations).join() {
+                
+                // If the target is currently hasted, cancel out the status effect
+                if let Some(_haste) = haste {
+                    entities_to_delete.push(entity);
+                    found_status = true;
+                    break;
                 }
-            )
-            .marked::<SimpleMarker<SerializeMe>>()
-            .build();
+                // If the target is currently slowed, just reset the duration counter
+                if let Some(_slow) = slow {
+                    if effect.target == target {
+                        found_status = true;
+                        duration.turns = slow_duration;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for entity in entities_to_delete {
+            ecs.delete_entity(entity).expect("Unable to delete");
+        }
+
+        if !found_status{
+            ecs.create_entity()
+                .with(StatusEffect{ target })
+                .with(Slow{})
+                .with(Duration{ turns : slow_duration, total_turns: slow_duration})
+                .with(Name{ name : "Slowed".to_string() })
+                .marked::<SimpleMarker<SerializeMe>>()
+                .build();
+        }
     }
 }
 
-pub fn damage_over_time(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    if let EffectType::DamageOverTime{damage} = &effect.effect_type {
-        ecs.create_entity()
-            .with(StatusEffect{ target })
-            .with(DamageOverTime{ damage : *damage })
-            .with(Duration{ turns : 5})
-            .with(Name{ name : "Damage Over Time".to_string() })
-            .marked::<SimpleMarker<SerializeMe>>()
-            .build();
+pub fn haste(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
+    // Haste will cancel out any slow status effect on the entity
+    if let EffectType::Haste = &effect.effect_type {
+        let haste_duration = 5;
+
+        let mut found_status = false;
+        let mut entities_to_delete : Vec<Entity> = Vec::new();
+        {
+            let mut durations = ecs.write_storage::<Duration>();
+            let status_effect = ecs.read_storage::<StatusEffect>();
+            let slowed = ecs.read_storage::<Slow>();
+            let hasted = ecs.read_storage::<Haste>();
+            let entities = ecs.entities();
+
+            
+            for (entity, effect, slow, haste, duration) in (&entities, &status_effect, (&slowed).maybe(), (&hasted).maybe(), &mut durations).join() {
+                
+                // If the target is currently slowed, cancel out the status effect
+                if let Some(_slow) = slow {
+                    entities_to_delete.push(entity);
+                    found_status = true;
+                    break;
+                }
+                // If the target is currently hasted, just reset the duration counter
+                if let Some(_haste) = haste {
+                    if effect.target == target {
+                        found_status = true;
+                        duration.turns = haste_duration;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for entity in entities_to_delete {
+            ecs.delete_entity(entity).expect("Unable to delete");
+        }
+
+        if !found_status{
+            ecs.create_entity()
+                .with(StatusEffect{ target })
+                .with(Haste{})
+                .with(Duration{ turns : haste_duration, total_turns: haste_duration})
+                .with(Name{ name : "Hasted".to_string() })
+                .marked::<SimpleMarker<SerializeMe>>()
+                .build();
+        }
     }
 }

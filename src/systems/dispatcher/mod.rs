@@ -22,7 +22,6 @@ pub trait UnifiedDispatcher {
 construct_dispatcher!(
     (MapIndexingSystem, "map_index", &[]),
     (VisibilitySystem, "visibility", &[]),
-    // (EncumbranceSystem, "encumbrance", &[]),
     (InitiativeSystem, "initiative", &[]),
     (TurnStatusSystem, "turnstatus", &[]),
     (QuipSystem, "quips", &[]),
@@ -45,7 +44,8 @@ construct_dispatcher!(
     (ItemRemoveSystem, "remove", &[]),
     (HungerSystem, "hunger", &[]),
     (ParticleSpawnSystem, "particle_spawn", &[]),
-    (LightingSystem, "lighting", &[])
+    (LightingSystem, "lighting", &[]),
+    (TurnEndSystem, "turn_end", &[])
 );
 
 pub fn new() -> Box<dyn UnifiedDispatcher + 'static> {

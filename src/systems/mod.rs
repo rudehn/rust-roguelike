@@ -22,6 +22,8 @@ pub mod particle_system;
 use particle_system::ParticleSpawnSystem;
 mod lighting_system;
 use lighting_system::LightingSystem;
+mod turn_end_system;
+use turn_end_system::TurnEndSystem;
 
 pub fn build() -> Box<dyn UnifiedDispatcher + 'static> {
     dispatcher::new()

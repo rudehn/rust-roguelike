@@ -1,5 +1,9 @@
 use rltk::{BLUE, GREEN, ORANGE, PURPLE, YELLOW};
 
+// DEBUG
+pub const SHOW_MAPGEN_VISUALIZER : bool = true;
+pub const SHOW_FPS : bool = true;
+
 // Game Mechanics
 pub const AMULET_LEVEL: i32 = 10;
 

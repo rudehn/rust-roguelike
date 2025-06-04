@@ -232,11 +232,9 @@ impl PrefabBuilder {
         let vault_roll = crate::rng::roll_dice(1, 6) + build_data.map.depth;
         if vault_roll < 4 { return; }
 
-        // Note that this is a place-holder and will be moved out of this function
-        let master_vault_list = vec![TOTALLY_NOT_A_TRAP, CHECKERBOARD, SILLY_SMILE, GOBLIN_WATCH_FIRE, ORC_WATCH_FIRE];
-
         // Filter the vault list down to ones that are applicable to the current depth
-        let mut possible_vaults : Vec<&PrefabRoom> = master_vault_list
+        let room_prefab_list = prefab_rooms::RoomPrefabs::new();
+        let mut possible_vaults : Vec<&PrefabRoom> = room_prefab_list.prefabs
             .iter()
             .filter(|v| { build_data.map.depth >= v.first_depth && build_data.map.depth <= v.last_depth })
             .collect();

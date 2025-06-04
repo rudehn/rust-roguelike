@@ -1285,7 +1285,7 @@
         "renderable": {
             "glyph" : "+",
             "fg" : "#805A46",
-            "bg" : "#000000",
+            "bg" : "#4D4D4D",
             "order" : 2
         },
         "hidden" : false,

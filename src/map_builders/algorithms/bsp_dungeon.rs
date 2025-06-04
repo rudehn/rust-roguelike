@@ -29,10 +29,10 @@ impl BspConfig {
         BspConfig {
             subdivision_variance: 0.2,
             depth: 6,
-            min_room_width: 6,
-            max_room_width: 10,
-            min_room_height: 6,
-            max_room_height: 10,
+            min_room_width: 7,
+            max_room_width: 14,
+            min_room_height: 7,
+            max_room_height: 14,
             max_padding: 9000, // Arbitrarily large number. Not maxint because that leads to overflow.
             min_padding: 2,
         }
@@ -92,32 +92,14 @@ impl BspDungeonBuilder {
 
     pub fn dungeon() -> Box<BspDungeonBuilder> {
         Box::new(BspDungeonBuilder{
-            config: BspConfig {
-                subdivision_variance: 0.2,
-                depth: 6,
-                min_room_width: 6,
-                max_room_width: 10,
-                min_room_height: 6,
-                max_room_height: 10,
-                max_padding: 9000, // Arbitrarily large number. Not maxint because that leads to overflow.
-                min_padding: 2,
-            },
+            config: BspConfig::dungeon(),
             rects: Vec::new(),
         })
     }
 
     pub fn interior() -> Box<BspDungeonBuilder> {
         Box::new(BspDungeonBuilder{
-            config: BspConfig {
-                subdivision_variance: 0.2,
-                depth: 5,
-                min_room_width: 6,
-                max_room_width: 9000,
-                min_room_height: 6,
-                max_room_height: 9000,
-                max_padding: 0, // this is what gives us the "interior" look
-                min_padding: 0,
-            },
+            config: BspConfig::interior(),
             rects: Vec::new(),
             })
     }

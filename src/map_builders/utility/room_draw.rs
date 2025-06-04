@@ -56,7 +56,7 @@ impl RoomDrawer {
         for room in rooms.iter() {
             let room_type = crate::rng::roll_dice(1,4);
             match room_type {
-                1 => self.circle(build_data, room),
+                // 1 => self.circle(build_data, room),
                 _ => self.rectangle(build_data, room)
             }
             build_data.take_snapshot();

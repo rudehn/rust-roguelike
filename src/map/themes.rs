@@ -8,7 +8,8 @@ pub fn tile_glyph(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, RGB) {
     };
 
     if map.bloodstains.contains(&idx) { bg = RGB::from_f32(0.75, 0., 0.); }
-    let visibility_mult = 0.08;
+    let visibility_mult = 0.16;
+    // let visibility_mult = 0.08;
     if !map.visible_tiles[idx] {
         // fg = fg.desaturate();
         // fg = fg.to_greyscale();
@@ -37,15 +38,18 @@ pub fn tile_glyph(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, RGB) {
 fn get_tile_glyph_default(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, RGB) {
     let glyph;
     let fg;
-    let mut bg = RGB::from_f32(0., 0., 0.);
+    // let mut bg = RGB::from_f32(0., 0., 0.);
+    let mut bg = RGB::from_f32(0.1, 0.1, 0.1);
 
     match map.tiles[idx] {
         TileType::Floor => { 
             glyph = rltk::to_cp437('.');
             // fg = RGB::from_u8(0x80, 0x80, 0x80);
             // bg = RGB::from_u8(0x40, 0x40, 0x40);
-            fg = RGB::named(rltk::DARKGRAY);
-            bg = RGB::named(rltk::GRAY1);
+            fg = RGB::from_f32(0.3, 0.3, 0.3);
+            // bg = RGB::from_f32(0.1, 0.1, 0.1);
+            // fg = RGB::named(rltk::DARKGRAY);
+            // bg = RGB::named(rltk::GRAY1);
         }
         TileType::WoodFloor => { glyph = rltk::to_cp437('░'); fg = RGB::named(rltk::CHOCOLATE); }
         TileType::Wall => {
@@ -53,8 +57,11 @@ fn get_tile_glyph_default(idx: usize, map : &Map) -> (rltk::FontCharType, RGB, R
             let y = idx as i32 / map.width;
             // glyph = wall_glyph(&*map, x, y);
             glyph = rltk::to_cp437('#');
-            fg = RGB::from_u8(0x40, 0x40, 0x40);
-            bg = RGB::from_u8(0x80, 0x80, 0x80);
+            
+            fg = RGB::from_f32(0.2, 0.2, 0.2);
+            // bg = RGB::from_f32(0.1, 0.1, 0.1);
+            // fg = RGB::from_u8(0x40, 0x40, 0x40);
+            // bg = RGB::from_u8(0x80, 0x80, 0x80);
         }
         TileType::DownStairs => { glyph = rltk::to_cp437('>'); fg = RGB::from_f32(0., 1.0, 1.0); }
         TileType::DungeonExit => { glyph = rltk::to_cp437('Ω'); fg = RGB::from_f32(1.0, 1.0, 1.0); }

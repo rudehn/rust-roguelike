@@ -51,7 +51,7 @@ pub fn player(ecs : &mut World, player_x : i32, player_y : i32) -> Entity {
             gold : 0.0,
             god_mode : false
         })
-        .with(LightSource{ color: rltk::RGB::from_f32(1.0, 1.0, 0.5), range: 12 })
+        .with(LightSource{ color: rltk::RGB::from_f32(1.0, 1.0, 1.0), range: 12 })
         .with(Initiative{
             energy_gain: DEFAULT_ENERGY_GAIN,
             attack_action_mult: 1.0,

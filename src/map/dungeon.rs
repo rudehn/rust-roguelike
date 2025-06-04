@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Serialize, Deserialize};
 use super::{Map, TileType};
 use crate::components::{Position, Viewshed, OtherLevelPosition};
-use crate::map_builders::level_builder;
+use crate::map_builders::{level_builder, map_dimensions};
 use specs::prelude::*;
 use rltk::Point;
 
@@ -112,7 +112,8 @@ fn make_potion_name(used_names : &mut HashSet<String>) -> String {
 }
 
 fn transition_to_new_map(ecs : &mut World, new_depth: i32) -> Vec<Map> {
-    let mut builder = level_builder(new_depth, 80, 50);
+    let (width, height) = map_dimensions(new_depth);
+    let mut builder = level_builder(new_depth, width, height);
     builder.build_map();
     if new_depth > 1 {
         if let Some(pos) = &builder.build_data.starting_position {

@@ -30,8 +30,6 @@ pub mod rng;
 pub mod spatial;
 pub mod vision;
 
-const SHOW_MAPGEN_VISUALIZER : bool = false;
-const SHOW_FPS : bool = true;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum VendorMode { Buy, Sell }
@@ -454,7 +452,7 @@ impl State {
             .append("Caverns Descent")
             .log();
         gamelog::Logger::new()
-            .append(format!("Descend the cavern to retrieve the Amulet of Endulo on floor {}", map_builders::AMULET_LEVEL))
+            .append(format!("Descend the cavern to retrieve the Amulet of Endulo on floor {}", crate::constants::AMULET_LEVEL))
             .log();
 
         gamelog::clear_events();

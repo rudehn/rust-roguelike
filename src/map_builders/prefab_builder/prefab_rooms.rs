@@ -8,6 +8,19 @@ pub struct PrefabRoom {
     pub last_depth: i32
 }
 
+// Hold a container of all room prefabs
+pub struct RoomPrefabs{
+    pub prefabs: Vec<PrefabRoom>
+}
+
+impl RoomPrefabs{
+    pub fn new() -> RoomPrefabs{
+        RoomPrefabs{
+            prefabs: vec![TOTALLY_NOT_A_TRAP, CHECKERBOARD, SILLY_SMILE, GOBLIN_WATCH_FIRE, ORC_WATCH_FIRE]
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub const TOTALLY_NOT_A_TRAP : PrefabRoom = PrefabRoom{
     template : TOTALLY_NOT_A_TRAP_MAP,
@@ -92,4 +105,3 @@ const ORC_WATCH_FIRE_MAP : &str = "
  ☼o
    
 ";
-
